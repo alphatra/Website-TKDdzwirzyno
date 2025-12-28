@@ -1,0 +1,29 @@
+{
+  "tasks": {
+    "check": "deno fmt --check && deno lint && deno check",
+    "start": "deno run -A npm:vite",
+    "build": "deno run -A npm:vite build",
+    "preview": "deno run -A npm:vite preview",
+    "update": "deno run -A -r jsr:@fresh/update .",
+    "styles:watch": "deno run -A npm:tailwindcss -i ./static/input.css -o ./static/styles.css --watch"
+  },
+  "lint": { "rules": { "tags": ["fresh", "recommended"] } },
+  "exclude": ["**/_fresh/*"],
+  "imports": {
+    "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^1.0.0",
+    "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.8",
+    "autoprefixer": "npm:autoprefixer@^10.4.23",
+    "postcss": "npm:postcss@^8.5.6",
+    "preact": "npm:preact@^10.27.2",
+    "@preact/signals": "npm:@preact/signals@^2.5.0",
+    "tailwindcss": "npm:tailwindcss@3.4.1",
+    "tailwindcss/": "npm:/tailwindcss@3.4.1/",
+    "tailwindcss/plugin": "npm:/tailwindcss@3.4.1/plugin.js",
+    "$std/": "https://deno.land/std@0.216.0/",
+    "fresh": "jsr:@fresh/core@^2.2.0",
+    "vite": "npm:vite@^7.3.0",
+    "nodemailer": "npm:nodemailer@6.9.13"
+  },
+  "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "preact" },
+  "nodeModulesDir": "auto"
+}
