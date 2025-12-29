@@ -1,0 +1,33 @@
+[Unit]
+Description=TKD Dzwirzyno Website (Deno + PocketBase)
+After=network.target
+
+[Service]
+# User/Group to run the service
+User=deploy
+Group=deploy
+
+# Working directory (points to the 'current' symlink)
+WorkingDirectory=/var/www/tkd-dzwirzyno/current
+
+# Environment variables
+# We assume .env is symlinked into current, but Deno Fresh reads .env automatically.
+# Alternatively, load them here:
+EnvironmentFile=/var/www/tkd-dzwirzyno/.env
+
+# Command to start the server
+# We use 'deno task start' or directly run the server entry point.
+# Ensuring we allow network, read, write, and env access.
+ExecStart=/root/.deno/bin/deno run -A _fresh/server.js
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Output logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tkd-website
+
+[Install]
+WantedBy=multi-user.target
