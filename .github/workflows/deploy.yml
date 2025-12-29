@@ -1,0 +1,69 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.x
+
+      - name: Build Project
+        run: |
+          # Install dependencies to ensure node_modules is populated
+          deno install
+          # Run the build task (Vite)
+          deno task build
+
+      - name: Create Release Artifact
+        run: |
+          # Compress necessary files into a tarball
+          # - _fresh/ : Build output
+          # - static/ : Static assets
+          # - pocketbase/ : Structure only (binary/data excluded by .gitignore but we need the dir structure if not handled by script)
+          #                 Actually script creates dir, but let's include non-ignored files if any. 
+          # - deno.json, deno.lock : Runtime config
+          # - node_modules/ : Dependencies
+          # - main.ts, dev.ts, etc. : Entrypoints
+          
+          # We purposefully exclude .git, .github, and raw source files if not needed, 
+          # but for a Deno app, source files are often needed at runtime if not fully bundled to a single file.
+          # Since Fresh + Vite might be different, usually we need the source for the server to run islands/routes.
+          # So we pack everything except what is ignored or hidden.
+          
+          # Using git archive to respect .gitignore would be clean, but we need the build artifacts (_fresh, node_modules) which are ignored.
+          
+          tar -czf release.tar.gz \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='pocketbase/pb_data' \
+            --exclude='pocketbase/*.db*' \
+            _fresh static deno.json deno.lock node_modules \
+            main.ts islands routes components utils
+
+      - name: Deploy to Server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+          # Copy deploy script first
+          scp scripts/deploy_server.sh $DEPLOY_USER@$DEPLOY_HOST:/tmp/deploy_server.sh
+          ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x /tmp/deploy_server.sh"
+
+          # Stream tarball to server and pipe into deploy script
+          cat release.tar.gz | ssh $DEPLOY_USER@$DEPLOY_HOST "/tmp/deploy_server.sh"
