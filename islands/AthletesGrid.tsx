@@ -1,6 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { Athlete } from "../utils/types.ts";
 import AthleteModal from "./AthleteModal.tsx";
+import { parseRank } from "../utils/rank.ts";
 
 interface AthletesGridProps {
   active: Athlete[];
@@ -10,17 +11,23 @@ interface AthletesGridProps {
 function AthleteCard(
   { athlete, onClick }: { athlete: Athlete; onClick: (a: Athlete) => void },
 ) {
+  const { number: rankNumber, type: rankType, rank } = parseRank(athlete.rank);
+
+  const [firstName, ...restName] = athlete.name.split(" ");
+  const lastName = restName.join(" ");
+
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onClick(athlete)}
-      class="athlete-card group relative bg-card-light dark:bg-card-dark rounded-3xl p-8 shadow-avant hover:shadow-2xl transition-[transform,box-shadow] duration-500 hover:-translate-y-2 border border-slate-100 dark:border-slate-700/50 overflow-hidden cursor-pointer"
+      class="athlete-card group relative text-left w-full bg-card-light dark:bg-card-dark rounded-3xl p-8 shadow-avant hover:shadow-2xl transition-[transform,box-shadow] duration-500 hover:-translate-y-2 border border-slate-100 dark:border-slate-700/50 overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-slate-900 motion-reduce:transition-none motion-reduce:transform-none"
     >
       {/* Decorative Elements - Consistent "Ring" with Rank Branding */}
       <div
         class={`absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700 ${
           athlete.status === "inactive"
             ? "bg-slate-500/5"
-            : athlete.rank.includes("DAN")
+            : rankType === "DAN"
             ? "bg-gold/10"
             : "bg-primary/5"
         }`}
@@ -71,28 +78,26 @@ function AthleteCard(
                   : athlete.status}
               </span>
             </div>
-            <h2
-              class="font-display text-2xl font-bold leading-tight"
-              dangerouslySetInnerHTML={{
-                __html: athlete.name.replace(" ", "<br/>"),
-              }}
-            >
+            <h2 class="font-display text-2xl font-bold leading-tight">
+                {firstName}
+                <br />
+                {lastName}
             </h2>
           </div>
         </div>
         <div class="flex flex-col items-end">
-          {athlete.rank.includes("DAN")
+          {rankType === "DAN"
             ? (
               <div class="dan-badge-custom px-3 py-1 rounded-sm shadow-md">
                 <span class="font-display text-sm font-black tracking-widest">
-                  {athlete.rank}
+                  {rank}
                 </span>
               </div>
             )
             : (
               <>
                 <span class="font-display text-3xl font-black text-slate-200 dark:text-slate-700 group-hover:text-primary transition-colors duration-300">
-                  {athlete.rank.replace(/\D/g, "")}
+                  {rankNumber}
                 </span>
                 <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
                   KUP
@@ -107,23 +112,23 @@ function AthleteCard(
         {/* Gold */}
         <div
           class={`text-center group/medal ${
-            !athlete.stats?.gold ? "opacity-30 grayscale" : ""
+            !(athlete.stats?.gold) ? "opacity-30 grayscale" : ""
           }`}
         >
           <div class="flex items-end gap-[2px] h-8 mb-2 justify-center">
             <div
               class={`w-1 rounded-sm transition-all duration-300 ${
-                athlete.stats?.gold
+                (athlete.stats?.gold || 0) > 0
                   ? "bg-gold/20 h-3 glow-gold"
                   : "bg-slate-300 h-1"
               }`}
             >
             </div>
-            {athlete.stats?.gold > 0 && (
+            {(athlete.stats?.gold || 0) > 0 && (
               <div class="w-1 h-6 bg-gold rounded-sm shadow-sm glow-gold">
               </div>
             )}
-            {athlete.stats?.gold > 4 && (
+            {(athlete.stats?.gold || 0) > 4 && (
               <div class="w-1 h-8 bg-gold rounded-sm shadow-sm glow-gold">
               </div>
             )}
@@ -139,23 +144,23 @@ function AthleteCard(
         {/* Silver */}
         <div
           class={`text-center group/medal ${
-            !athlete.stats?.silver ? "opacity-30 grayscale" : ""
+            !(athlete.stats?.silver) ? "opacity-30 grayscale" : ""
           }`}
         >
           <div class="flex items-end gap-[2px] h-8 mb-2 justify-center">
             <div
               class={`w-1 rounded-sm transition-all duration-300 ${
-                athlete.stats?.silver
+                (athlete.stats?.silver || 0) > 0
                   ? "bg-silver/40 h-3 glow-silver"
                   : "bg-slate-300 h-1"
               }`}
             >
             </div>
-            {athlete.stats?.silver > 0 && (
+            {(athlete.stats?.silver || 0) > 0 && (
               <div class="w-1 h-6 bg-silver rounded-sm shadow-sm glow-silver">
               </div>
             )}
-            {athlete.stats?.silver > 4 && (
+            {(athlete.stats?.silver || 0) > 4 && (
               <div class="w-1 h-8 bg-silver rounded-sm shadow-sm glow-silver">
               </div>
             )}
@@ -171,23 +176,23 @@ function AthleteCard(
         {/* Bronze */}
         <div
           class={`text-center group/medal ${
-            !athlete.stats?.bronze ? "opacity-30 grayscale" : ""
+            !(athlete.stats?.bronze) ? "opacity-30 grayscale" : ""
           }`}
         >
           <div class="flex items-end gap-[2px] h-8 mb-2 justify-center">
             <div
               class={`w-1 rounded-sm transition-all duration-300 ${
-                athlete.stats?.bronze
+                (athlete.stats?.bronze || 0) > 0
                   ? "bg-bronze/40 h-3 glow-bronze"
                   : "bg-slate-300 h-1"
               }`}
             >
             </div>
-            {athlete.stats?.bronze > 0 && (
+            {(athlete.stats?.bronze || 0) > 0 && (
               <div class="w-1 h-4 bg-bronze rounded-sm shadow-sm glow-bronze">
               </div>
             )}
-            {athlete.stats?.bronze > 4 && (
+            {(athlete.stats?.bronze || 0) > 4 && (
               <div class="w-1 h-8 bg-bronze rounded-sm shadow-sm glow-bronze">
               </div>
             )}
@@ -300,31 +305,51 @@ function AthleteCard(
             )}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
 export default function AthletesGrid({ active, alumni }: AthletesGridProps) {
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
 
+  // Handle Deep Linking & History Navigation
   useEffect(() => {
-    console.log("AthletesGrid Hydrated! Active athletes:", active.length);
-  }, []);
+    const handleUrlChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      const athleteId = params.get("athlete");
+      
+      if (athleteId) {
+        const found = [...active, ...(alumni || [])].find((a) => a.id === athleteId);
+        if (found) {
+          setSelectedAthlete(found);
+        }
+      } else {
+        setSelectedAthlete(null);
+      }
+    };
+
+    // Initial check
+    handleUrlChange();
+
+    // Listen for back/forward
+    window.addEventListener("popstate", handleUrlChange);
+    return () => window.removeEventListener("popstate", handleUrlChange);
+  }, [active, alumni]);
 
   const openModal = (athlete: Athlete) => {
-    console.log("Clicked athlete:", athlete);
     setSelectedAthlete(athlete);
+    const url = new URL(window.location.href);
+    url.searchParams.set("athlete", athlete.id);
+    history.pushState({}, "", url.toString());
   };
-  const closeModal = () => setSelectedAthlete(null);
 
-  return (
+  const closeModal = () => {
+    setSelectedAthlete(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("athlete");
+    history.pushState({}, "", url.toString());
+  }; return (
     <>
-      <div
-        class="p-4 bg-red-500 mb-4 text-white font-bold text-center cursor-pointer hover:bg-red-600"
-        onClick={() => alert("JAVASCRIPT IS CONNECTED!")}
-      >
-        DEBUG: CLICK ME TO TEST JAVASCRIPT
-      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
         {active.map((athlete) => (
           <AthleteCard key={athlete.id} athlete={athlete} onClick={openModal} />

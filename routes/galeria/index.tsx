@@ -1,6 +1,5 @@
-import { PageProps } from "fresh";
+import { define } from "../../utils.ts";
 import pb from "../../utils/pb.ts";
-import { Handlers } from "fresh/compat";
 
 interface Album {
   id: string;
@@ -12,43 +11,46 @@ interface Album {
   collectionId: string;
 }
 
-interface Data {
-  albums: Album[];
-}
-
-export const handler: Handlers<Data> = {
-  async GET(ctx) {
+export default define.page(async function Gallery() {
+  let albums: Album[] = [];
+  try {
     const records = await pb.collection("albums").getList<Album>(1, 50, {
       sort: "-date",
     });
-    return ctx.render({ albums: records.items });
-  },
-};
-
-export default function Gallery({ data }: PageProps<Data>) {
-  const { albums } = data;
+    albums = records.items;
+  } catch (error) {
+    console.error("Error fetching albums:", error);
+  }
 
   return (
-    <>
-      <div class="bg-primary text-white py-20 pb-32 relative overflow-hidden">
+    <div class="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-emerald-500/30">
+        <div class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-body min-h-screen relative">
+             <div class="absolute inset-0 z-0 bg-grid opacity-40 pointer-events-none"></div>
+      
+      {/* Hero Section */}
+      <div class="relative z-10 bg-slate-900 text-white py-20 pb-32 overflow-hidden">
         <div class="absolute inset-0 opacity-10 bg-[url('/pattern.svg')]"></div>
-        <div class="container-custom relative z-10 text-center">
-          <h1 class="text-4xl md:text-5xl font-heading font-bold mb-4">
-            Galeria Wydarzeń
+        <div class="container mx-auto px-4 z-10 relative text-center">
+             <span class="text-primary text-xs font-bold tracking-[0.2em] uppercase mb-3 block animate-pulse">Wspomnienia</span>
+          <h1 class="font-display text-4xl md:text-6xl font-black uppercase tracking-tighter mb-4 text-white">
+            Galeria <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Wydarzeń</span>
           </h1>
-          <p class="text-xl text-gray-300 max-w-2xl mx-auto">
-            Wspomnienia z naszych obozów, zawodów i treningów.
+          <p class="text-slate-400 max-w-2xl mx-auto font-light text-lg">
+            Momenty chwały, ciężkiej pracy i wspólnej radości. Zobacz jak trenujemy i zwyciężamy.
           </p>
         </div>
-        <div class="absolute bottom-0 left-0 right-0 h-16 bg-white clip-path-slant-up">
-        </div>
+        
+        {/* Decorative slants */}
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-background-light dark:bg-background-dark clip-path-slant-up"></div>
       </div>
 
-      <div class="container-custom py-12 -mt-20 relative z-20">
+      <div class="container mx-auto px-4 py-12 -mt-20 relative z-20">
         {albums.length === 0
           ? (
-            <div class="text-center py-20 bg-white rounded-xl shadow-xl">
-              <p class="text-gray-500 text-xl">Brak albumów w galerii.</p>
+            <div class="text-center py-20 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700">
+              <div class="text-6xl mb-6 opacity-80">📸</div>
+              <h3 class="text-2xl font-bold text-slate-700 dark:text-slate-200 mb-2">Jeszcze nic tu nie ma</h3>
+              <p class="text-slate-500 dark:text-slate-400">Albumy pojawią się wkrótce.</p>
             </div>
           )
           : (
@@ -56,54 +58,49 @@ export default function Gallery({ data }: PageProps<Data>) {
               {albums.map((album) => (
                 <a
                   href={`/galeria/${album.id}`}
-                  class="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 block h-full flex flex-col"
+                  class="group bg-white dark:bg-slate-800 rounded-3xl shadow-avant hover:shadow-2xl overflow-hidden transition-all duration-500 hover:-translate-y-2 block h-full flex flex-col border border-slate-100 dark:border-slate-700/50"
+                  key={album.id}
                 >
-                  <div class="h-64 bg-gray-200 relative overflow-hidden">
+                  <div class="h-64 bg-slate-200 dark:bg-slate-700 relative overflow-hidden">
                     {album.cover
                       ? (
                         <img
-                          src={`http://127.0.0.1:8090/api/files/${album.collectionId}/${album.id}/${album.cover}`}
+                          src={`/api/files/${album.collectionId}/${album.id}/${album.cover}?thumb=600x400`}
                           alt={album.title}
                           class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                       )
                       : (
-                        <div class="flex items-center justify-center h-full text-gray-400">
-                          <span class="text-5xl">📷</span>
+                        <div class="flex items-center justify-center h-full text-slate-400">
+                          <span class="material-icons-round text-6xl opacity-50">photo_library</span>
                         </div>
                       )}
-                    <div class="absolute top-4 left-4 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500"></div>
+                    <div class="absolute top-4 left-4 bg-secondary/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
                       {album.category}
                     </div>
                   </div>
-                  <div class="p-6 flex-grow flex flex-col justify-between">
+                  
+                  <div class="p-8 flex-grow flex flex-col justify-between relative">
                     <div>
-                      <h3 class="text-xl font-heading font-bold mb-2 group-hover:text-primary transition-colors">
+                      <h3 class="text-xl font-display font-bold mb-3 group-hover:text-primary transition-colors text-slate-800 dark:text-white leading-tight">
                         {album.title}
                       </h3>
-                      <div class="text-sm text-gray-500 mb-4 flex items-center">
-                        <svg
-                          class="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                          >
-                          </path>
-                        </svg>
-                        {new Date(album.date).toLocaleDateString("pl-PL")}
+                      <div class="text-xs font-mono text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
+                        <span class="material-icons-round text-sm">event</span>
+                        {new Date(album.date).toLocaleDateString("pl-PL", {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
                       </div>
                     </div>
-                    <div class="text-primary font-bold text-sm uppercase tracking-wider flex items-center mt-4">
-                      Zobacz zdjęcia{" "}
-                      <span class="ml-2 group-hover:translate-x-2 transition-transform">
-                        →
-                      </span>
+                    
+                    <div class="pt-6 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">Otwórz album</span>
+                        <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                            <span class="material-icons-round text-sm">arrow_forward</span>
+                        </div>
                     </div>
                   </div>
                 </a>
@@ -111,6 +108,7 @@ export default function Gallery({ data }: PageProps<Data>) {
             </div>
           )}
       </div>
-    </>
+     </div>
+    </div>
   );
-}
+});

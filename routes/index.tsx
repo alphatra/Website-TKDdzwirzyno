@@ -1,8 +1,6 @@
-/** @jsxImportSource preact */
+import { define } from "../utils.ts";
 import { Head } from "fresh/runtime";
-import { PageProps } from "fresh";
-import pb from "../utils/pb.ts";
-import { Handlers } from "fresh/compat";
+import Header from "../islands/Header.tsx";
 
 interface NewsItem {
   id: string;
@@ -11,14 +9,11 @@ interface NewsItem {
   created: string;
 }
 
-export const handler: Handlers<NewsItem[]> = {
-  GET(ctx) {
-    console.log("Index Handler Reached");
-    return ctx.render([]);
-  },
-};
+// Handler removed to use Async Component / Static pattern
+// export const handler = define.handlers({ ... });
 
-export default function Home({ data }: PageProps<NewsItem[]>) {
+export default define.page(function Home(props) {
+  const data = props.state.news as NewsItem[] || [];
   return (
     <>
       <Head>
@@ -28,6 +23,8 @@ export default function Home({ data }: PageProps<NewsItem[]>) {
           content="Klub Taekwondo nad morzem. Trenuj z nami w Dźwirzynie."
         />
       </Head>
+
+      <Header menuPages={props.state.menuPages || []} />
 
       {/* Hero Section: Ocean & Claw */}
       <section class="relative min-h-screen flex items-center bg-primary-900 text-white overflow-hidden">
@@ -215,4 +212,4 @@ export default function Home({ data }: PageProps<NewsItem[]>) {
       </section>
     </>
   );
-}
+});

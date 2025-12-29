@@ -1,7 +1,7 @@
-import { PageProps } from "fresh";
+import { define } from "../utils.ts";
 import { Head } from "fresh/runtime";
 import pb from "../utils/pb.ts";
-import { Handlers } from "fresh/compat";
+import Header from "../islands/Header.tsx";
 import { HttpError } from "fresh";
 
 interface PageData {
@@ -11,35 +11,82 @@ interface PageData {
   visible: boolean;
 }
 
-export const handler: Handlers<PageData> = {
-  async GET(ctx) {
-    const slug = ctx.params.slug;
-    try {
-      const records = await pb.collection("pages").getList<PageData>(1, 1, {
-        filter: `slug = "${slug}" && visible = true`,
-      });
+// @deno-types="npm:@types/sanitize-html"
+import sanitizeHtml from "sanitize-html";
 
-      if (records.items.length === 0) {
-        throw new HttpError(404);
-      }
+export default define.page(async function DynamicPage(props) {
+  const slug = props.params.slug;
+  
+  // Security: Validate slug to prevent PocketBase filter injection
+  if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
+    return (
+      <div class="container-custom py-32 text-center">
+        <h1 class="text-4xl font-bold">400 - Nieprawidłowy adres (Bad Request)</h1>
+        <p>Adres URL zawiera niedozwolone znaki.</p>
+        <a href="/" class="btn bg-primary text-white mt-4 inline-block">Wróć na start</a>
+      </div>
+    );
+  }
 
-      const page = records.items[0];
-      return ctx.render(page);
-    } catch (e) {
-      console.error("Page fetch error:", e);
-      throw new HttpError(404);
+  let page: PageData | null = null;
+
+  try {
+    const records = await pb.collection("pages").getList<PageData>(1, 1, {
+      filter: `slug = "${slug}" && visible = true`,
+    });
+    if (records.items.length > 0) {
+      page = records.items[0];
     }
-  },
-};
+  } catch (e) {
+    console.error(`Page fetch error (${slug}):`, e);
+  }
 
-export default function DynamicPage({ data }: PageProps<PageData>) {
-  const { title, subtitle, content } = data;
+  if (!page) {
+    // 404 Not Found
+    return (
+      <>
+        <Head>
+          <title>Nie znaleziono - TKD Dzwirzyno</title>
+        </Head>
+        <Header menuPages={props.state.menuPages || []} />
+        <div class="container-custom py-32 text-center">
+          <h1 class="text-4xl font-bold">
+            404 - Strona nie została znaleziona
+          </h1>
+          <p>Sprawdź adres URL lub wróć na stronę główną.</p>
+          <a href="/" class="btn bg-primary text-white mt-4 inline-block">
+            Wróć na start
+          </a>
+        </div>
+      </>
+    );
+  }
+
+  const { title, subtitle, content } = page;
+  const { menuPages } = props.state;
+  
+  // Security: Sanitize HTML content
+  const cleanContent = sanitizeHtml(content, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img', 'h1', 'h2' ]),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      'img': [ 'src', 'alt', 'class' ],
+      '*': ['class'],
+      'a': [ 'href', 'target', 'name' ]
+    },
+    allowedSchemes: [ 'http', 'https', 'mailto' ],
+    transformTags: {
+      'a': sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer' })
+    }
+  });
 
   return (
     <>
       <Head>
         <title>{title} - TKD Dzwirzyno</title>
       </Head>
+
+      <Header menuPages={menuPages} />
 
       {/* Avant-garde Hero with Geometric Shapes */}
       <div class="relative bg-gradient-to-br from-primary-900 via-primary to-secondary text-white py-24 pb-40 overflow-hidden">
@@ -106,9 +153,10 @@ export default function DynamicPage({ data }: PageProps<PageData>) {
                             prose-li:before:content-['▸'] prose-li:before:absolute prose-li:before:left-0 
                             prose-li:before:text-secondary prose-li:before:font-bold prose-li:before:text-xl
                             prose-hr:border-secondary prose-hr:border-2">
-                <div dangerouslySetInnerHTML={{ __html: content }} />
+                {/* deno-lint-ignore react-no-danger */}
+                <div dangerouslySetInnerHTML={{ __html: cleanContent }} />
               </article>
-
+              
               {/* Call to Action */}
               <div class="mt-12 pt-8 border-t-2 border-gray-100 text-center">
                 <a
@@ -134,4 +182,4 @@ export default function DynamicPage({ data }: PageProps<PageData>) {
       </div>
     </>
   );
-}
+});

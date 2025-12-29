@@ -1,5 +1,10 @@
-import { useEffect, useRef } from "preact/hooks";
+
+import { useRef } from "preact/hooks";
+import { type JSX } from "preact";
 import { Athlete } from "../utils/types.ts";
+import { parseRank } from "../utils/rank.ts";
+import { useScrollLock } from "./hooks/useScrollLock.ts";
+import { useFocusTrap } from "./hooks/useFocusTrap.ts";
 
 interface AthleteModalProps {
   athlete: Athlete | null;
@@ -11,42 +16,61 @@ export default function AthleteModal(
   { athlete, isOpen, onClose }: AthleteModalProps,
 ) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null); // Keep this ref for initial focus
 
-  // Handle ESC key
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    if (isOpen) window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [isOpen, onClose]);
-
-  // Handle Scroll Lock
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  // Use custom hooks for robust behavior
+  useScrollLock(isOpen);
+  useFocusTrap(isOpen, modalRef, onClose, closeButtonRef);
 
   // Handle Outside Click
-  const handleBackdropClick = (e: MouseEvent) => {
+  const handleBackdropPointerDown: JSX.PointerEventHandler<HTMLDivElement> = (e) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
       onClose();
     }
   };
 
+  // Handle Share
+  const handleShare = async () => {
+    if (!athlete) return;
+    
+    // Ensure URL has the athlete param (it should from the grid, but safe to be sure)
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("athlete")) {
+       url.searchParams.set("athlete", athlete.id);
+    }
+
+    const shareData = {
+      title: `${athlete.name} - TKD Dźwirzyno`,
+      text: `Sprawdź osiągnięcia zawodnika ${athlete.name} w Klubie Taekwondo Dźwirzyno!`,
+      url: url.toString(),
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(
+          `${shareData.title}\n${shareData.text}\n${shareData.url}`,
+        );
+        alert("Skopiowano link do schowka!");
+      } catch (err) {
+        console.error("Clipboard error:", err);
+        alert("Nie udało się udostępnić.");
+      }
+    }
+  };
+
   if (!isOpen || !athlete) return null;
 
-  // Derive display values
-  const rankNumber = athlete.rank.replace(/\D/g, "");
-  const rankType = athlete.rank.includes("DAN") ? "DAN" : "KUP";
-  const firstName = athlete.name.split(" ")[0];
-  const lastName = athlete.name.split(" ").slice(1).join(" ");
+  // Derive display values using utility
+  const { number: rankNumber, type: rankType } = parseRank(athlete.rank);
+  const names = athlete.name.split(" ");
+  const firstName = names[0];
+  const lastName = names.length > 1 ? names.slice(1).join(" ") : ""; // Handle single names
   const totalMedals = (athlete.stats?.gold || 0) +
     (athlete.stats?.silver || 0) + (athlete.stats?.bronze || 0);
 
@@ -82,14 +106,17 @@ export default function AthleteModal(
   };
 
   // Safe fallback for status
-  const statusConfig = statusMap[athlete.status] || statusMap.active;
+  const status = athlete.status || "active";
+  const statusConfig = statusMap[status] || statusMap.active;
 
   return (
     <div
       aria-modal="true"
       class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden"
       role="dialog"
-      onClick={handleBackdropClick as any}
+      aria-labelledby="modal-athlete-name"
+      aria-describedby={athlete.bio ? "modal-athlete-bio" : undefined}
+      onPointerDown={handleBackdropPointerDown}
     >
       <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-md transition-opacity duration-300">
       </div>
@@ -99,8 +126,10 @@ export default function AthleteModal(
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          ref={closeButtonRef}
           onClick={onClose}
-          class="absolute top-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md text-slate-800 dark:text-white hover:text-primary hover:bg-white/20 border border-white/20 transition-all duration-300 group"
+          aria-label="Zamknij"
+          class="absolute top-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md text-slate-800 dark:text-white hover:text-primary hover:bg-white/20 border border-white/20 transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <span class="material-icons-round text-xl group-hover:rotate-90 transition-transform duration-300">
             close
@@ -145,7 +174,7 @@ export default function AthleteModal(
               </div>
             </div>
             <div class="mb-8">
-              <h2 class="font-display text-4xl md:text-5xl font-black text-white leading-[0.9] tracking-tight mb-3 drop-shadow-lg">
+              <h2 id="modal-athlete-name" class="font-display text-4xl md:text-5xl font-black text-white leading-[0.9] tracking-tight mb-3 drop-shadow-lg">
                 {firstName}
                 <br />
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-slate-500">
@@ -176,7 +205,7 @@ export default function AthleteModal(
                 <span class="text-6xl text-primary/40 font-serif absolute -top-8 -left-4 leading-none select-none">
                   “
                 </span>
-                <p class="font-body font-light italic text-slate-300 text-lg leading-relaxed relative z-10 pl-2 border-l-2 border-primary/30 line-clamp-4">
+                <p id="modal-athlete-bio" class="font-body font-light italic text-slate-300 text-lg leading-relaxed relative z-10 pl-2 border-l-2 border-primary/30 line-clamp-4">
                   {athlete.bio}
                 </p>
               </div>
@@ -278,7 +307,7 @@ export default function AthleteModal(
                               month: "long",
                               year: "numeric",
                             })
-                            : result.expand?.competition?.year || "2025"}
+                            : result.expand?.competition?.year || "—"}
                         </span>
                         <h4 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">
                           {result.expand?.competition?.name || "Zawody"}
@@ -320,7 +349,10 @@ export default function AthleteModal(
           </div>
 
           <div class="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm flex justify-between items-center z-20">
-            <button class="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex items-center gap-2">
+            <button
+              onClick={handleShare}
+              class="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex items-center gap-2"
+            >
               <span class="material-icons-round text-base">share</span>
               Udostępnij
             </button>

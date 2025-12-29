@@ -1,54 +1,49 @@
-/** @jsxImportSource preact */
-import { type PageProps } from "fresh";
-import Header from "../islands/Header.tsx";
-import Footer from "../components/Footer.tsx";
+import { define } from "../utils.ts";
+import { Head } from "fresh/runtime";
+import "../app.css";
 
-export default function App(props: PageProps) {
-  const { Component, state } = props;
-  // state populated by _middleware.ts
-  const siteInfo = state?.siteInfo;
-  const menuPages = (state?.menuPages || []) as any[]; // Dynamic menu items
-
+export default define.page(function App({ Component }) {
   return (
-    <html lang="pl" class="bg-gray-900 dark no-transition">
+    <html lang="pl">
       <head>
+        <Head />
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>TKD Dzwirzyno - Klub Taekwondo</title>
-        <link rel="stylesheet" href="/styles.css?v=4" />
-        <link rel="icon" href="/favicon.ico" />
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link
+          crossOrigin="true"
+          href="https://fonts.gstatic.com"
+          rel="preconnect"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700;900&display=swap"
+          rel="stylesheet"
+        />
         <link
           href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
           rel="stylesheet"
         />
-        <meta
-          name="description"
-          content="Klub sportowy Taekwondo w Dzwirzyno. Treningi dla dzieci i młodzieży. Rozwijamy pasję, dyscyplinę i charakter."
-        />
-        <style
-          dangerouslySetInnerHTML={{
-            __html: ".no-transition * { transition: none !important; }",
-          }}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-          window.addEventListener('load', function() {
-            requestAnimationFrame(function() {
-              document.documentElement.classList.remove('no-transition');
-            });
-          });
-        `,
-          }}
-        />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                var local = localStorage.getItem('theme');
+                var support = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (local === 'dark' || (!local && support)) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch (e) {}
+            })();
+          `,
+        }}
+      />
       </head>
-      <body class="bg-gray-900 text-slate-800">
-        <Header menuPages={menuPages} />
-        <main class="min-h-screen">
-          <Component {...(props as any)} />
-        </main>
-        <Footer siteInfo={siteInfo} />
+      <body>
+        <Component />
       </body>
     </html>
   );
-}
+});

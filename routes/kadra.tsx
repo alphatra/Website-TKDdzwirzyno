@@ -1,23 +1,10 @@
+import sanitizeHtml from "sanitize-html";
+import { define } from "../utils.ts";
 import { Head } from "fresh/runtime";
-import { PageProps } from "fresh";
-import { Handlers } from "fresh/compat";
 import pb from "../utils/pb.ts";
+import Header from "../islands/Header.tsx";
 
-interface Result {
-  id: string;
-  athlete: string;
-  coach: string;
-  competition: string;
-  medal: "gold" | "silver" | "bronze" | "participation";
-  discipline: string;
-  description: string;
-  expand?: {
-    competition: {
-      name: string;
-      year: number;
-    };
-  };
-}
+import type { Result } from "../utils/types.ts";
 
 interface Coach {
   id: string;
@@ -34,49 +21,43 @@ interface ProcessedCoach extends Coach {
   results: Result[];
 }
 
-interface Data {
-  coaches: ProcessedCoach[];
-}
+export default define.page(async function Kadra(props) {
+  let processedCoaches: ProcessedCoach[] = [];
 
-export const handler: Handlers<Data> = {
-  async GET(ctx) {
-    try {
-      const coaches = await pb.collection("coaches").getFullList<Coach>({
-        sort: "created",
-      });
+  try {
+    const coaches = await pb.collection("coaches").getFullList<Coach>({
+      sort: "created",
+    });
 
-      const results = await pb.collection("results").getFullList<Result>({
-        filter: 'coach != ""',
-        expand: "competition",
-        sort: "-created",
-      });
+    const results = await pb.collection("results").getFullList<Result>({
+      filter: 'coach != ""',
+      expand: "competition",
+      sort: "-created",
+    });
 
-      const processed = coaches.map((c) => {
-        const coachResults = results.filter((r) => r.coach === c.id);
-        // Sort by year
-        coachResults.sort((a, b) =>
-          (b.expand?.competition?.year || 0) -
-          (a.expand?.competition?.year || 0)
-        );
-        return { ...c, results: coachResults };
-      });
+    processedCoaches = coaches.map((c) => {
+      const coachResults = results.filter((r) => r.coach === c.id);
+      // Sort by year
+      coachResults.sort((a, b) =>
+        (b.expand?.competition?.year || 0) -
+        (a.expand?.competition?.year || 0)
+      );
+      return { ...c, results: coachResults };
+    });
+  } catch (e) {
+    console.error("PocketBase Fetch Error (Trainers):", e);
+    // Fallback or empty state
+  }
 
-      return ctx.render({ coaches: processed });
-    } catch (e) {
-      console.warn("PocketBase Fetch Error (Trainers):", e);
-      return ctx.render({ coaches: [] });
-    }
-  },
-};
-
-export default function Kadra({ data }: PageProps<Data>) {
-  const { coaches } = data;
+  const { menuPages } = props.state;
 
   return (
     <>
       <Head>
         <title>Kadra Trenerska - TKD Dzwirzyno</title>
       </Head>
+
+      <Header menuPages={menuPages} />
 
       {/* Hero */}
       <section class="relative py-24 bg-gray-900 text-white overflow-hidden">
@@ -102,7 +83,20 @@ export default function Kadra({ data }: PageProps<Data>) {
       <section class="py-24 bg-white relative">
         <div class="container-custom">
           <div class="grid lg:grid-cols-2 gap-16">
-            {coaches.map((trainer, idx) => (
+            {processedCoaches.map((trainer, idx) => {
+              const photoUrl = trainer.photo
+                ? pb.files.getUrl(trainer, trainer.photo)
+                : `https://ui-avatars.com/api/?name=${trainer.name}&size=512&background=0D8ABC&color=fff`;
+
+              const cleanBio = sanitizeHtml(trainer.bio, {
+                allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+                allowedAttributes: {
+                    ...sanitizeHtml.defaults.allowedAttributes,
+                    'img': ['src', 'alt', 'class']
+                }
+              });
+
+              return (
               <div key={idx} class="group relative">
                 {/* Decorative Elements */}
                 <div class="absolute -top-10 -left-10 w-40 h-40 bg-gray-50 rounded-full -z-10 group-hover:scale-150 transition-transform duration-700">
@@ -116,8 +110,7 @@ export default function Kadra({ data }: PageProps<Data>) {
                       </div>
 
                       <img
-                        src={trainer.photo ||
-                          `https://ui-avatars.com/api/?name=${trainer.name}&size=512&background=0D8ABC&color=fff`}
+                        src={photoUrl}
                         alt={trainer.name}
                         class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                       />
@@ -143,7 +136,7 @@ export default function Kadra({ data }: PageProps<Data>) {
                     </h3>
                     <div
                       class="text-gray-600 leading-relaxed mb-8 text-lg"
-                      dangerouslySetInnerHTML={{ __html: trainer.bio }}
+                      dangerouslySetInnerHTML={{ __html: cleanBio }}
                     />
 
                     {trainer.results.length > 0 && (
@@ -190,10 +183,11 @@ export default function Kadra({ data }: PageProps<Data>) {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>
     </>
   );
-}
+});
