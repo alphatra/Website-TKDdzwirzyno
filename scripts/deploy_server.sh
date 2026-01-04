@@ -42,9 +42,18 @@ ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
 # Restart Service
 # Restart or Install Service
 echo "Updating service definition..."
-# Debug Deno version on server
-echo "Server Deno Version:"
-/home/deploy/.deno/bin/deno --version || echo "Failed to get Deno version"
+# Check and Install Deno
+echo "Checking Deno installation..."
+export DENO_INSTALL="/home/deploy/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
+
+if ! command -v deno >/dev/null 2>&1; then
+    echo "Deno not found. Installing..."
+    curl -fsSL https://deno.land/install.sh | sh
+    echo "Deno installed to $DENO_INSTALL"
+else
+    echo "Deno is already installed: $(deno --version)"
+fi
 
 SERVICE_NAME="tkd-dzwirzyno"
 SERVICE_FILE="${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service"
