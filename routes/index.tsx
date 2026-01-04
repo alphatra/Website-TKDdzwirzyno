@@ -90,7 +90,7 @@ export default define.page(function Home(props) {
             <div class="relative z-10 w-full aspect-[4/5] bg-gradient-to-br from-gray-800 to-black skew-x-[-6deg] shadow-2xl border-t border-l border-white/10 overflow-hidden group">
                {/* Image Placeholder or Actual Hero Image */}
                <img
-                 src="/Zespol.png"
+                 src="/Zespol.jpg"
                  alt="Zespół TKD Dźwirzyno"
                  class="absolute inset-0 w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700 ease-out scale-105 group-hover:scale-110"
                  loading="eager"
