@@ -15,12 +15,12 @@ WorkingDirectory=/var/www/tkd-dzwirzyno/current
 # Alternatively, load them here:
 EnvironmentFile=/var/www/tkd-dzwirzyno/.env
 
+# Add deno path to environment just in case
+Environment="PATH=/home/deploy/.deno/bin:/usr/local/bin:/usr/bin:/bin"
+
 # Command to start the server
-# We use 'deno task start' or directly run the server entry point.
-# Ensuring we allow network, read, write, and env access.
-# Deno path assumed to be in deploy user's home or globally installed.
-# Adjust this path if Deno is installed elsewhere (e.g. /usr/bin/deno)
-ExecStart=/home/deploy/.deno/bin/deno run -A _fresh/server.js
+# Using 'deno task start' ensures we use the command defined in deno.json
+ExecStart=/home/deploy/.deno/bin/deno task start
 
 # Restart policy
 Restart=always
