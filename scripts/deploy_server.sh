@@ -56,12 +56,37 @@ else
 fi
 
 # Service Management
-# User confirmed server config is correct, so we only need to restart the specific service.
-echo "Restarting fresh.service..."
-if sudo systemctl restart fresh.service; then
-    echo "Service fresh.service restarted successfully."
+# Nginx Configuration Update
+NGINX_CONF="${NEW_RELEASE_DIR}/config/nginx/tkd-dzwirzyno.conf"
+if [ -f "$NGINX_CONF" ]; then
+    echo "Updating Nginx configuration..."
+    sudo cp "$NGINX_CONF" /etc/nginx/sites-available/tkd-dzwirzyno.conf
+    sudo ln -sf /etc/nginx/sites-available/tkd-dzwirzyno.conf /etc/nginx/sites-enabled/
+    if sudo nginx -t; then
+        sudo systemctl reload nginx
+        echo "Nginx reloaded successfully."
+    else
+        echo "Warning: Nginx syntax check failed. Skipping reload."
+    fi
+fi
+
+# Service Management
+# Ensure we use the correct service name
+SERVICE_NAME="tkd-dzwirzyno"
+SERVICE_FILE="${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service"
+
+if [ -f "$SERVICE_FILE" ]; then
+    echo "Updating systemd service definition..."
+    sudo cp "$SERVICE_FILE" /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable $SERVICE_NAME
+fi
+
+echo "Restarting ${SERVICE_NAME}.service..."
+if sudo systemctl restart $SERVICE_NAME; then
+    echo "Service ${SERVICE_NAME} restarted successfully."
 else
-    echo "Error: Failed to restart fresh.service"
+    echo "Error: Failed to restart ${SERVICE_NAME}"
     exit 1
 fi
 
