@@ -13,3 +13,7 @@ app.use(async (ctx) => {
 
 // Include file-system based routes here
 app.fsRoutes();
+
+if (import.meta.main) {
+  await app.listen();
+}
