@@ -55,22 +55,13 @@ else
     echo "Deno is already installed: $(deno --version)"
 fi
 
-SERVICE_NAME="tkd-dzwirzyno"
-SERVICE_FILE="${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service"
-
-if [ -f "$SERVICE_FILE" ]; then
-    echo "Service file found in release. Updating system configuration..."
-    sudo cp "$SERVICE_FILE" /etc/systemd/system/
-    sudo systemctl daemon-reload
-    
-    if ! sudo systemctl is-enabled --quiet $SERVICE_NAME; then
-        sudo systemctl enable $SERVICE_NAME
-    fi
-    
-    echo "Restarting service..."
-    sudo systemctl restart $SERVICE_NAME
+# Service Management
+# User confirmed server config is correct, so we only need to restart the specific service.
+echo "Restarting fresh.service..."
+if sudo systemctl restart fresh.service; then
+    echo "Service fresh.service restarted successfully."
 else
-    echo "Error: Service config file not found in release. Cannot update/install."
+    echo "Error: Failed to restart fresh.service"
     exit 1
 fi
 
