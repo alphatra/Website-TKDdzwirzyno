@@ -1,5 +1,6 @@
 import { define } from "../utils.ts";
 import { Head } from "fresh/runtime";
+import LinkPrefetcher from "../islands/features/shared/LinkPrefetcher.tsx";
 import "../app.css";
 
 export default define.page(function App({ Component }) {
@@ -45,6 +46,7 @@ export default define.page(function App({ Component }) {
       </head>
       <body>
         <Component />
+        <LinkPrefetcher />
       </body>
     </html>
   );

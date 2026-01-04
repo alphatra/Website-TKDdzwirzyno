@@ -123,6 +123,13 @@
   }
 }
 
+.bg-gradient-mesh {
+  background-color: var(--color-primary-900);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(217, 4, 41, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.15) 0px, transparent 50%);
+}
+
 /* Custom Utilities */
 .fresh-gradient {
   background-color: rgb(134, 239, 172);

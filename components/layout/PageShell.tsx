@@ -1,9 +1,10 @@
 import { ComponentChildren } from "preact";
 import { Head } from "fresh/runtime";
-import Header from "@/islands/Header.tsx";
+import Header from "../../islands/Header.tsx";
 import { MenuPageRecord } from "../../utils/pocketbase.ts";
 
 import { absUrl } from "../../utils/seo.ts";
+import { LocalBusinessSchema } from "../seo/LocalBusinessSchema.tsx";
 
 interface PageShellProps {
   children: ComponentChildren;
@@ -70,6 +71,7 @@ export function PageShell({
           content="#0f172a"
           media="(prefers-color-scheme: dark)"
         />
+        <LocalBusinessSchema />
       </Head>
       {!noHeader && <Header menuPages={menuPages} />}
       <main

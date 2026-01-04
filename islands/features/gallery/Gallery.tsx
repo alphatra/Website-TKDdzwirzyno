@@ -107,10 +107,18 @@ export default function Gallery({ items }: GalleryProps) {
               }
             }}
           >
+            {/* LQIP Placeholder - Simple colored background with pulse */}
+            <div class="absolute inset-0 bg-slate-700 animate-pulse z-0"></div>
+
             <img
               src={`/api/files/${item.collectionId}/${item.id}/${item.image}?thumb=400x300`}
               alt={item.title}
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-90 group-hover:opacity-100"
+              class="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 opacity-0 group-hover:opacity-100 relative z-10"
+              style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
+              onLoad={(e) => {
+                (e.target as HTMLImageElement).style.opacity = "1";
+                // Optional: remove placeholder or just cover it
+              }}
               loading="lazy"
               width="400"
               height="300"

@@ -12,6 +12,26 @@ node_modules/
 vendor/
 
 
+
+# System
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+
+# Backups & Logs
+_backup/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
+dist/
+coverage/
+
 # PocketBase
 pocketbase/
 pocketbase_bin/

@@ -1,6 +1,7 @@
 import { define } from "../utils.ts";
 import { PageShell } from "../components/layout/PageShell.tsx";
 import { Section } from "../components/layout/Section.tsx";
+import ParallaxBackground from "../islands/ui/ParallaxBackground.tsx";
 import { NewsRecord } from "../utils/pocketbase.ts";
 
 export default define.page(function Home(props) {
@@ -24,10 +25,12 @@ export default define.page(function Home(props) {
       <section class="relative min-h-screen flex items-center bg-primary-900 text-white overflow-hidden">
         {/* Abstract Claw Background */}
         <div class="absolute inset-0 z-0">
-          <div class="absolute -top-1/2 -right-1/4 w-[1000px] h-[1000px] bg-secondary-600/20 rounded-full blur-3xl">
-          </div>
-          <div class="absolute -bottom-1/2 -left-1/4 w-[800px] h-[800px] bg-primary-600/20 rounded-full blur-3xl">
-          </div>
+          <ParallaxBackground speed={0.2} className="w-full h-full">
+            <div class="absolute -top-1/2 -right-1/4 w-[1000px] h-[1000px] bg-secondary-600/20 rounded-full blur-3xl">
+            </div>
+            <div class="absolute -bottom-1/2 -left-1/4 w-[800px] h-[800px] bg-primary-600/20 rounded-full blur-3xl">
+            </div>
+          </ParallaxBackground>
           {/* Grid Pattern */}
           <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30">
           </div>
