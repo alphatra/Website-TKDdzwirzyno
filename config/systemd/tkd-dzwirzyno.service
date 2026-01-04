@@ -13,7 +13,10 @@ WorkingDirectory=/var/www/tkd-dzwirzyno/current
 # Environment variables
 # We assume .env is symlinked into current, but Deno Fresh reads .env automatically.
 # Alternatively, load them here:
-EnvironmentFile=/var/www/tkd-dzwirzyno/.env
+# Environment variables
+# We assume .env is symlinked into current, but Deno Fresh reads .env automatically.
+# EnvironmentFile removed to avoid systemd parsing strictness; Deno loads .env via --env-file
+
 
 # Add deno path to environment just in case
 Environment="PATH=/home/deploy/.deno/bin:/usr/local/bin:/usr/bin:/bin"

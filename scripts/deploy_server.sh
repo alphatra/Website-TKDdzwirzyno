@@ -42,6 +42,10 @@ ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
 # Restart Service
 # Restart or Install Service
 echo "Updating service definition..."
+# Debug Deno version on server
+echo "Server Deno Version:"
+/home/deploy/.deno/bin/deno --version || echo "Failed to get Deno version"
+
 SERVICE_NAME="tkd-dzwirzyno"
 SERVICE_FILE="${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service"
 
