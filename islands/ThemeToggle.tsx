@@ -32,6 +32,8 @@ export default function ThemeToggle() {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
+  if (!theme) return null; // Avoid hydration mismatch by rendering nothing until mounted
+
   return (
     <button
       type="button"

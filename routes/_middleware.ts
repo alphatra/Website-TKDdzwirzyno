@@ -1,5 +1,5 @@
 import { FreshContext } from "fresh";
-import pb from "../utils/pb.ts";
+import pb from "../utils/client.ts";
 import { NewsRecord, SiteInfoRecord } from "../utils/pocketbase.ts";
 
 // Simple in-memory cache

@@ -1,4 +1,4 @@
-import pb from "./pb.ts";
+import pb from "./client.ts";
 
 export { pb };
 

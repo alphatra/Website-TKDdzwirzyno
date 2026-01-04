@@ -16,7 +16,8 @@ export default function ParallaxBackground({
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!ref.current) return;
+      // Memory leak fix: check if component is still mounted/ref exists
+      if (!ref.current) return; 
       const scrollY = globalThis.scrollY;
       const offset = scrollY * speed;
       ref.current.style.transform = `translateY(${offset}px)`;

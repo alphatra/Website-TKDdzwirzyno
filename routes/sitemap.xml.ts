@@ -1,4 +1,4 @@
-import pb from "../utils/pb.ts";
+import pb from "../utils/client.ts";
 import { NewsRecord, PageRecord } from "../utils/pocketbase.ts";
 import { Handlers } from "fresh/compat";
 

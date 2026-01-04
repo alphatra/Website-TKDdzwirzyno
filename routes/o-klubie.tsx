@@ -1,7 +1,7 @@
 // ... imports
 import { sanitize } from "../utils/sanitize.ts";
 import { define } from "../utils.ts";
-import pb from "../utils/pb.ts";
+import pb from "../utils/client.ts";
 import { PageShell } from "../components/layout/PageShell.tsx";
 import { PageRecord } from "../utils/pocketbase.ts";
 

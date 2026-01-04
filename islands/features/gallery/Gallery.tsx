@@ -22,7 +22,8 @@ export default function Gallery({ items }: GalleryProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const handleClose = () => setSelectedImage(null);
+  /* Fixed: Wrap handleClose in useCallback to improve performance */
+  const handleClose = useCallback(() => setSelectedImage(null), []);
 
   // Use custom hooks
   useScrollLock(!!selectedImage);

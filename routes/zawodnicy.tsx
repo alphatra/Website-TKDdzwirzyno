@@ -1,5 +1,5 @@
 import { define } from "../utils.ts";
-import pb from "../utils/pb.ts";
+import pb from "../utils/client.ts";
 import { PageShell } from "../components/layout/PageShell.tsx";
 import AthletesGrid from "../islands/features/athletes/Grid.tsx";
 import { Athlete, EnrichedAthlete, Result } from "../utils/types.ts";

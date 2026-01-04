@@ -2,6 +2,8 @@ import { ComponentChildren } from "preact";
 import { Head } from "fresh/runtime";
 import Header from "../../islands/Header.tsx";
 import { MenuPageRecord } from "../../utils/pocketbase.ts";
+import { Footer } from "./Footer.tsx"; // Import Footer
+import { GlobalErrorBoundary } from "../../islands/GlobalErrorBoundary.tsx";
 
 import { absUrl } from "../../utils/seo.ts";
 import { LocalBusinessSchema } from "../seo/LocalBusinessSchema.tsx";
@@ -74,12 +76,15 @@ export function PageShell({
         <LocalBusinessSchema />
       </Head>
       {!noHeader && <Header menuPages={menuPages} />}
-      <main
-        class={`min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white transition-colors duration-300 ${className}`}
-      >
-        {children}
-      </main>
-      {footer}
+      <GlobalErrorBoundary>
+        <main
+          class={`min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white transition-colors duration-300 ${className}`}
+        >
+          {children}
+        </main>
+        {/* Auto-render footer if not explicitly overridden, or render the override */}
+        {footer !== undefined ? footer : <Footer />}
+      </GlobalErrorBoundary>
     </>
   );
 }

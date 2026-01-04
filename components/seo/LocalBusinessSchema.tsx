@@ -1,33 +1,33 @@
 import { Head } from "fresh/runtime";
 import { absUrl } from "../../utils/seo.ts";
+import { SITE_CONFIG } from "../../utils/siteConfig.ts";
 
 export function LocalBusinessSchema() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "SportsClub",
-    "name": "TKD Dźwirzyno",
-    "description":
-      "Klub Taekwondo nad morzem. Trenuj z nami w Dźwirzynie. Siła, charakter, dyscyplina.",
-    "image": absUrl("/logo.png"),
+    "name": SITE_CONFIG.name,
+    "description": SITE_CONFIG.description,
+    "image": absUrl(SITE_CONFIG.ogImage),
     "url": absUrl("/"),
-    "telephone": "+48 000 000 000", // TODO: Update with real phone number
-    "priceRange": "$",
+    "telephone": SITE_CONFIG.contact.phone,
+    "priceRange": "$", // Keeping generic
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Wyzwolenia", // Keeping generic if exact unknown
-      "addressLocality": "Dźwirzyno",
-      "postalCode": "78-131",
-      "addressCountry": "PL",
+      "streetAddress": SITE_CONFIG.contact.address.street,
+      "addressLocality": SITE_CONFIG.contact.address.city,
+      "postalCode": SITE_CONFIG.contact.address.zip,
+      "addressCountry": SITE_CONFIG.contact.address.country,
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": 54.15,
-      "longitude": 15.41,
+      "latitude": SITE_CONFIG.contact.geo.lat,
+      "longitude": SITE_CONFIG.contact.geo.lng,
     },
     "sameAs": [
-      "https://www.facebook.com/tkddzwirzyno",
-      "https://www.instagram.com/tkddzwirzyno",
-    ],
+      SITE_CONFIG.social.facebook,
+      SITE_CONFIG.social.instagram,
+    ].filter(Boolean),
   };
 
   return (
