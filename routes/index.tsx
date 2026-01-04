@@ -92,6 +92,8 @@ export default define.page(function Home(props) {
                <img
                  src="/Zespol.jpg"
                  alt="Zespół TKD Dźwirzyno"
+                 width="1433"
+                 height="1920"
                  class="absolute inset-0 w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700 ease-out scale-105 group-hover:scale-110"
                  loading="eager"
                />

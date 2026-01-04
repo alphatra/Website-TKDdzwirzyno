@@ -13,18 +13,18 @@ export function Footer() {
           <div class="md:col-span-1">
             <a href="/" class="block mb-6 group">
               <div class="flex items-center gap-3">
-                 <img src={SITE_CONFIG.logo} alt={SITE_CONFIG.name} class="h-16 w-auto" />
+                 <img src={SITE_CONFIG.logo} alt={SITE_CONFIG.name} class="h-16 w-auto" width="967" height="967" />
                  <div>
                     <h2 class="text-2xl font-heading font-black tracking-tighter leading-none text-secondary-900 dark:text-white group-hover:text-primary transition-colors">
                       TKD
                     </h2>
-                    <p class="text-xs font-mono text-gray-500 uppercase tracking-widest mt-1 group-hover:text-secondary-900 dark:group-hover:text-white transition-colors">
+                    <p class="text-xs font-mono text-slate-600 uppercase tracking-widest mt-1 group-hover:text-secondary-900 dark:group-hover:text-white transition-colors">
                       Dźwirzyno
                     </p>
                  </div>
               </div>
             </a>
-            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">
+            <p class="text-slate-700 dark:text-slate-400 text-sm leading-relaxed mb-6">
               {SITE_CONFIG.description}
             </p>
             <div class="flex gap-4">
@@ -70,7 +70,7 @@ export function Footer() {
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    class="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors text-sm hover:translate-x-1 transform inline-block"
+                    class="text-slate-700 dark:text-gray-400 hover:text-primary transition-colors text-sm hover:translate-x-1 transform inline-block"
                   >
                     {link.label}
                   </a>
@@ -84,7 +84,7 @@ export function Footer() {
             <h3 class="text-lg font-heading font-bold mb-6 text-secondary-900 dark:text-white border-l-2 border-primary pl-3">
               Kontakt
             </h3>
-            <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-400">
+            <ul class="space-y-4 text-sm text-slate-700 dark:text-gray-400">
               <li class="flex items-start gap-3 group">
                 <span class="text-primary mt-1">📍</span>
                 <span class="group-hover:text-secondary-900 dark:group-hover:text-white transition-colors">
@@ -125,13 +125,13 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div class="border-t border-gray-200 dark:border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 dark:text-gray-600 font-mono">
+        <div class="border-t border-gray-200 dark:border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 dark:text-gray-600 font-mono">
           <div>
             &copy; {new Date().getFullYear()} TKD Dźwirzyno. All rights reserved.
           </div>
           <div class="flex gap-6">
-            <a href="#" class="hover:text-gray-800 dark:hover:text-gray-400">Polityka Prywatności</a>
-            <a href="#" class="hover:text-gray-800 dark:hover:text-gray-400">Regulamin</a>
+            <a href="#" class="hover:text-slate-900 dark:hover:text-gray-400">Polityka Prywatności</a>
+            <a href="#" class="hover:text-slate-900 dark:hover:text-gray-400">Regulamin</a>
           </div>
            <div class="opacity-30">
               Designed by Antigravity
