@@ -47,7 +47,7 @@ jobs:
             --exclude='pocketbase/pb_data' \
             --exclude='pocketbase/*.db*' \
             _fresh static deno.json deno.lock node_modules \
-            main.ts islands routes components utils
+            main.ts islands routes components utils config
 
       - name: Deploy to Server
         env:
