@@ -40,8 +40,27 @@ echo "Switching to new release..."
 ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
 
 # Restart Service
-echo "Restarting service..."
-sudo systemctl restart tkd-dzwirzyno
+# Restart or Install Service
+echo "Checking service status..."
+SERVICE_NAME="tkd-dzwirzyno"
+
+if sudo systemctl list-unit-files | grep -q "${SERVICE_NAME}.service"; then
+    echo "Service exists. Restarting..."
+    sudo systemctl restart $SERVICE_NAME
+else
+    echo "Service not found. Attempting first-time installation..."
+    # Attempt to copy service file and start
+    if [ -f "${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service" ]; then
+        sudo cp "${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service" /etc/systemd/system/
+        sudo systemctl daemon-reload
+        sudo systemctl enable $SERVICE_NAME
+        sudo systemctl start $SERVICE_NAME
+        echo "Service installed and started successfully."
+    else
+        echo "Error: Service config file not found in release. Cannot install."
+        exit 1
+    fi
+fi
 
 # Cleanup old releases (keep last 5)
 echo "Cleaning up old releases..."
