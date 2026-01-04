@@ -41,25 +41,24 @@ ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
 
 # Restart Service
 # Restart or Install Service
-echo "Checking service status..."
+echo "Updating service definition..."
 SERVICE_NAME="tkd-dzwirzyno"
+SERVICE_FILE="${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service"
 
-if sudo systemctl list-unit-files | grep -q "${SERVICE_NAME}.service"; then
-    echo "Service exists. Restarting..."
+if [ -f "$SERVICE_FILE" ]; then
+    echo "Service file found in release. Updating system configuration..."
+    sudo cp "$SERVICE_FILE" /etc/systemd/system/
+    sudo systemctl daemon-reload
+    
+    if ! sudo systemctl is-enabled --quiet $SERVICE_NAME; then
+        sudo systemctl enable $SERVICE_NAME
+    fi
+    
+    echo "Restarting service..."
     sudo systemctl restart $SERVICE_NAME
 else
-    echo "Service not found. Attempting first-time installation..."
-    # Attempt to copy service file and start
-    if [ -f "${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service" ]; then
-        sudo cp "${NEW_RELEASE_DIR}/config/systemd/${SERVICE_NAME}.service" /etc/systemd/system/
-        sudo systemctl daemon-reload
-        sudo systemctl enable $SERVICE_NAME
-        sudo systemctl start $SERVICE_NAME
-        echo "Service installed and started successfully."
-    else
-        echo "Error: Service config file not found in release. Cannot install."
-        exit 1
-    fi
+    echo "Error: Service config file not found in release. Cannot update/install."
+    exit 1
 fi
 
 # Cleanup old releases (keep last 5)
