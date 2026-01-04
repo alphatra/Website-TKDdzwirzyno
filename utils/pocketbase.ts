@@ -1,3 +1,7 @@
+import pb from "./pb.ts";
+
+export { pb };
+
 export interface BaseRecord {
   id: string;
   collectionId: string;
