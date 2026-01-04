@@ -17,3 +17,7 @@ export type {
   ResultRecord,
   SiteInfoRecord,
 } from "./pocketbase.ts";
+
+export interface State {
+  shared: string;
+}
