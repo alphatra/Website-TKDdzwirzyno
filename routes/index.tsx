@@ -1,32 +1,26 @@
 import { define } from "../utils.ts";
-import { Head } from "fresh/runtime";
-import Header from "../islands/Header.tsx";
-
-interface NewsItem {
-  id: string;
-  title: string;
-  summary: string;
-  created: string;
-}
-
-// Handler removed to use Async Component / Static pattern
-// export const handler = define.handlers({ ... });
+import { PageShell } from "../components/layout/PageShell.tsx";
+import { Section } from "../components/layout/Section.tsx";
+import { NewsRecord } from "../utils/pocketbase.ts";
 
 export default define.page(function Home(props) {
-  const data = props.state.news as NewsItem[] || [];
+  const data = props.state.news as NewsRecord[] || [];
+
   return (
-    <>
-      <Head>
-        <title>TKD Dzwirzyno - Siła i Charakter</title>
-        <meta
-          name="description"
-          content="Klub Taekwondo nad morzem. Trenuj z nami w Dźwirzynie."
-        />
-      </Head>
-
-      <Header menuPages={props.state.menuPages || []} />
-
+    <PageShell
+      title="TKD Dzwirzyno - Siła i Charakter"
+      description="Klub Taekwondo nad morzem. Trenuj z nami w Dźwirzynie."
+      menuPages={props.state.menuPages || []}
+      ogImage="/static/bg_hero.jpg"
+      ogType="website"
+    >
       {/* Hero Section: Ocean & Claw */}
+      {
+        /* We use manual section for Hero because of custom relative/overflow requirements that might conflict with standard Section container?
+          Actually Section supports custom classes. Let's try to use Section or kept it raw if complex.
+          The Hero has a LOT of custom logic. Let's wrap it in a Section with container=false or just keep it raw but inside PageShell.
+      */
+      }
       <section class="relative min-h-screen flex items-center bg-primary-900 text-white overflow-hidden">
         {/* Abstract Claw Background */}
         <div class="absolute inset-0 z-0">
@@ -64,7 +58,7 @@ export default define.page(function Home(props) {
             </div>
           </div>
 
-          {/* Hero Visual (Placeholder for now, maybe an SVG or Image) */}
+          {/* Hero Visual (Placeholder) */}
           <div class="hidden md:flex justify-center animate-fade-in relative">
             <div class="relative w-80 h-96 bg-gradient-to-tr from-secondary to-primary-600 skew-y-6 shadow-2xl rounded-sm flex items-center justify-center">
               <span class="text-9xl">🥋</span>
@@ -80,53 +74,51 @@ export default define.page(function Home(props) {
       </section>
 
       {/* Philosophy Section */}
-      <section class="py-24 bg-white">
-        <div class="container-custom">
-          <div class="max-w-4xl mx-auto text-center mb-16">
-            <h2 class="text-4xl md:text-5xl font-heading font-bold text-primary-900 mb-6 uppercase tracking-tight">
-              Więcej niż <span class="text-secondary">Sport</span>
-            </h2>
-            <p class="text-gray-600 text-lg">
-              Trenujemy nie tylko ciało, ale i ducha. Nasza metoda opiera się na
-              tradycyjnych wartościach Taekwondo połączonych z nowoczesnym
-              treningiem motorycznym.
-            </p>
-          </div>
-
-          <div class="grid md:grid-cols-3 gap-8">
-            {[
-              { icon: "💪", title: "Siła", desc: "Zbuduj fizyczną przewagę." },
-              {
-                icon: "🧠",
-                title: "Dyscyplina",
-                desc: "Panuj nad swoim umysłem.",
-              },
-              { icon: "🤝", title: "Szacunek", desc: "Wygrywaj z klasą." },
-            ].map((feature, i) => (
-              <div
-                key={i}
-                class="group p-8 border border-gray-100 hover:border-secondary/20 bg-gray-50 hover:bg-white transition-all hover:shadow-xl rounded-sm relative overflow-hidden"
-              >
-                <div class="absolute top-0 right-0 w-20 h-20 bg-secondary/5 rounded-bl-[4rem] transition-transform group-hover:scale-150">
-                </div>
-                <div class="text-5xl mb-6 relative z-10">{feature.icon}</div>
-                <h3 class="text-2xl font-heading font-bold text-primary-900 mb-3">
-                  {feature.title}
-                </h3>
-                <p class="text-gray-500">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
+      <Section bg="white">
+        <div class="max-w-4xl mx-auto text-center mb-16">
+          <h2 class="text-4xl md:text-5xl font-heading font-bold text-primary-900 mb-6 uppercase tracking-tight">
+            Więcej niż <span class="text-secondary">Sport</span>
+          </h2>
+          <p class="text-gray-600 text-lg">
+            Trenujemy nie tylko ciało, ale i ducha. Nasza metoda opiera się na
+            tradycyjnych wartościach Taekwondo połączonych z nowoczesnym
+            treningiem motorycznym.
+          </p>
         </div>
-      </section>
+
+        <div class="grid md:grid-cols-3 gap-8">
+          {[
+            { icon: "💪", title: "Siła", desc: "Zbuduj fizyczną przewagę." },
+            {
+              icon: "🧠",
+              title: "Dyscyplina",
+              desc: "Panuj nad swoim umysłem.",
+            },
+            { icon: "🤝", title: "Szacunek", desc: "Wygrywaj z klasą." },
+          ].map((feature, i) => (
+            <div
+              key={i}
+              class="group p-8 border border-gray-100 hover:border-secondary/20 bg-gray-50 hover:bg-white transition-all hover:shadow-xl rounded-sm relative overflow-hidden"
+            >
+              <div class="absolute top-0 right-0 w-20 h-20 bg-secondary/5 rounded-bl-[4rem] transition-transform group-hover:scale-150">
+              </div>
+              <div class="text-5xl mb-6 relative z-10">{feature.icon}</div>
+              <h3 class="text-2xl font-heading font-bold text-primary-900 mb-3">
+                {feature.title}
+              </h3>
+              <p class="text-gray-500">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
 
       {/* News Section */}
-      <section class="py-24 bg-primary-900 text-white relative">
+      <Section bg="primary" class="relative">
         {/* Angular Divider Top */}
         <div class="absolute top-0 left-0 right-0 h-24 bg-white clip-path-slant-down">
         </div>
 
-        <div class="container-custom relative z-10 pt-12">
+        <div class="relative z-10 pt-12">
           <div class="flex justify-between items-end mb-12 border-b border-primary-800 pb-6">
             <div>
               <span class="text-secondary font-bold tracking-widest uppercase text-sm">
@@ -151,11 +143,22 @@ export default define.page(function Home(props) {
                 key={item.id}
                 class="group bg-primary-800 hover:bg-primary-750 transition-colors rounded-sm overflow-hidden flex flex-col h-full border border-primary-700 hover:border-secondary/50"
               >
-                <div class="h-48 bg-primary-700 flex items-center justify-center relative overflow-hidden">
-                  {/* Placeholder for News Image if available, keeping it simple for now */}
-                  <span class="text-6xl opacity-50 group-hover:scale-110 transition-transform duration-500">
-                    📰
-                  </span>
+                <div class="h-48 bg-primary-700 flex items-center justify-center relative overflow-hidden group-hover:opacity-90 transition-opacity">
+                  {item.image
+                    ? (
+                      <img
+                        src={`/api/files/${item.collectionId}/${item.id}/${item.image}`}
+                        alt={item.title}
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    )
+                    : (
+                      <span class="text-6xl opacity-20 select-none">
+                        🥋
+                      </span>
+                    )}
+
                   <div class="absolute top-4 left-4 bg-secondary text-white text-xs font-bold px-2 py-1 uppercase tracking-wider">
                     News
                   </div>
@@ -183,33 +186,31 @@ export default define.page(function Home(props) {
             )}
           </div>
         </div>
-      </section>
+      </Section>
 
       {/* CTA Box */}
-      <section class="relative py-24 bg-white">
-        <div class="container-custom">
-          <div class="bg-gradient-to-r from-secondary-600 to-secondary-500 rounded-2xl p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')] opacity-20">
-            </div>
+      <Section bg="white">
+        <div class="bg-gradient-to-r from-secondary-600 to-secondary-500 rounded-2xl p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+          <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')] opacity-20">
+          </div>
 
-            <div class="relative z-10">
-              <h2 class="text-4xl md:text-6xl font-heading font-bold text-white mb-6">
-                Twoja droga zaczyna się tutaj
-              </h2>
-              <p class="text-xl text-secondary-100 mb-10 max-w-2xl mx-auto">
-                Pierwszy trening jest zawsze darmowy. Przyjdź, zobacz, poczuj
-                atmosferę. Nie musisz być wielki, żeby zacząć.
-              </p>
-              <a
-                href="/kontakt"
-                class="btn bg-white text-secondary-900 hover:bg-gray-100 text-xl px-12 py-5 font-heading font-bold shadow-lg"
-              >
-                Zapisz się na trening
-              </a>
-            </div>
+          <div class="relative z-10">
+            <h2 class="text-4xl md:text-6xl font-heading font-bold text-white mb-6">
+              Twoja droga zaczyna się tutaj
+            </h2>
+            <p class="text-xl text-secondary-100 mb-10 max-w-2xl mx-auto">
+              Pierwszy trening jest zawsze darmowy. Przyjdź, zobacz, poczuj
+              atmosferę. Nie musisz być wielki, żeby zacząć.
+            </p>
+            <a
+              href="/kontakt"
+              class="btn bg-white text-secondary-900 hover:bg-gray-100 text-xl px-12 py-5 font-heading font-bold shadow-lg"
+            >
+              Zapisz się na trening
+            </a>
           </div>
         </div>
-      </section>
-    </>
+      </Section>
+    </PageShell>
   );
 });

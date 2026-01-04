@@ -1,22 +1,15 @@
-// @deno-types="npm:@types/sanitize-html"
-import sanitizeHtml from "sanitize-html";
+// ... imports
+import { sanitize } from "../utils/sanitize.ts";
 import { define } from "../utils.ts";
-import { Head } from "fresh/runtime";
 import pb from "../utils/pb.ts";
-import Header from "../islands/Header.tsx";
-
-interface PageData {
-  title: string;
-  subtitle?: string;
-  content: string;
-  visible: boolean;
-}
+import { PageShell } from "../components/layout/PageShell.tsx";
+import { PageRecord } from "../utils/pocketbase.ts";
 
 export default define.page(async function AboutPage(props) {
-  // Real data fetch
-  let record: PageData | null = null;
+  // Real data fetch logic remains same ...
+  let record: PageRecord | null = null;
   try {
-    const records = await pb.collection("pages").getList<PageData>(1, 1, {
+    const records = await pb.collection("pages").getList<PageRecord>(1, 1, {
       filter: 'slug = "o-klubie" && visible = true',
     });
     if (records.items.length > 0) {
@@ -26,24 +19,24 @@ export default define.page(async function AboutPage(props) {
     console.error("Error fetching o-klubie:", e);
   }
 
-  // Fallback if DB is empty or fails (or migration incomplete)
+  const { menuPages } = props.state;
+
   if (!record) {
+    // ... error fallback
     return (
-      <>
-        <Head>
-          <title>Nie znaleziono - TKD Dzwirzyno</title>
-        </Head>
-        <Header menuPages={props.state.menuPages || []} />
+      <PageShell
+        title="Nie znaleziono - TKD Dzwirzyno"
+        menuPages={menuPages || []}
+      >
         <div class="container-custom py-32 text-center">
           <h1 class="text-4xl font-bold">Strona w przygotowaniu</h1>
           <p>Nie udało się pobrać treści.</p>
         </div>
-      </>
+      </PageShell>
     );
   }
 
   const { title, subtitle, content } = record;
-  const { menuPages } = props.state;
 
   // Split content by <hr>
   const sections = content.split("<hr>").map((s) => s.trim());
@@ -52,40 +45,16 @@ export default define.page(async function AboutPage(props) {
   const rawHistory = sections[2] || "";
 
   // Sanitize Content
-  /* Sanitize Content with strict security policy */
-  const sanitizeOptions = {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img', 'h2', 'h3', 'ul', 'li', 'br' ]),
-    allowedAttributes: {
-        ...sanitizeHtml.defaults.allowedAttributes,
-        'img': [ 'src', 'alt', 'class', 'title' ],
-        '*': ['class'],
-        'a': [ 'href', 'target', 'name', 'title' ]
-    },
-    allowedSchemes: [ 'http', 'https', 'mailto' ],
-    allowedSchemesByTag: {
-      img: [ 'http', 'https', 'data' ], // explicit for images
-    },
-    transformTags: {
-      'a': sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer' }) // Force security on links
-    }
-  };
-
-  const introContent = sanitizeHtml(rawIntro, sanitizeOptions);
-  const valuesContent = sanitizeHtml(rawValues, sanitizeOptions);
-  const historyContent = sanitizeHtml(rawHistory, sanitizeOptions);
+  const introContent = sanitize(rawIntro, "cms");
+  const valuesContent = sanitize(rawValues, "cms");
+  const historyContent = sanitize(rawHistory, "cms");
 
   return (
-    <>
-      <Head>
-        <title>{title} - TKD Dzwirzyno</title>
-        <meta
-          name="description"
-          content="Poznaj historię i misję klubu TKD Dzwirzyno."
-        />
-      </Head>
-
-      <Header menuPages={menuPages} />
-
+    <PageShell
+      title={`${title} - TKD Dzwirzyno`}
+      description="Poznaj historię i misję klubu TKD Dzwirzyno."
+      menuPages={menuPages}
+    >
       {/* 1. CLEAN HERO SECTION */}
       <section class="bg-primary-900 py-32 text-center text-white relative overflow-hidden">
         <div class="container-custom relative z-10 px-4">
@@ -108,8 +77,10 @@ export default define.page(async function AboutPage(props) {
             <div class="prose prose-lg md:prose-xl max-w-none text-gray-800 
                         prose-headings:font-heading prose-headings:font-bold prose-headings:text-primary-900 
                         prose-p:leading-8 prose-p:mb-6 prose-strong:text-secondary-600">
-              {/* deno-lint-ignore react-no-danger */}
-              <div dangerouslySetInnerHTML={{ __html: introContent }} />
+              <div
+                // deno-lint-ignore react-no-danger
+                dangerouslySetInnerHTML={{ __html: introContent }}
+              />
             </div>
           </div>
         </div>
@@ -131,8 +102,10 @@ export default define.page(async function AboutPage(props) {
                         prose-li:list-none prose-li:m-0 
                         prose-h3:text-primary-900 prose-h3:mt-0 prose-h3:mb-4 prose-h3:text-xl
                         prose-p:text-gray-600 prose-p:text-base prose-p:m-0">
-              {/* deno-lint-ignore react-no-danger */}
-              <div dangerouslySetInnerHTML={{ __html: valuesContent }} />
+              <div
+                // deno-lint-ignore react-no-danger
+                dangerouslySetInnerHTML={{ __html: valuesContent }}
+              />
             </div>
           </div>
         </section>
@@ -154,8 +127,10 @@ export default define.page(async function AboutPage(props) {
               <div class="prose prose-lg max-w-none text-gray-800
                            prose-headings:font-heading prose-headings:text-primary-900
                            prose-p:text-gray-600">
-                {/* deno-lint-ignore react-no-danger */}
-                <div dangerouslySetInnerHTML={{ __html: historyContent }} />
+                <div
+                  // deno-lint-ignore react-no-danger
+                  dangerouslySetInnerHTML={{ __html: historyContent }}
+                />
               </div>
 
               <div class="mt-16 text-center">
@@ -170,6 +145,6 @@ export default define.page(async function AboutPage(props) {
           </div>
         </section>
       )}
-    </>
+    </PageShell>
   );
 });

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-primary: #ca2026; /* TKD Red */
@@ -24,47 +25,101 @@
   --color-secondary-700: #334155;
   --color-secondary-800: #1e293b;
   --color-secondary-900: #0f172a;
-  
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
-  --font-heading: 'Outfit', sans-serif;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-heading: "Orbitron", sans-serif;
+  --font-display: "Orbitron", sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
 
   /* Medal Colors */
   --color-gold: #eab308;
   --color-silver: #94a3b8;
   --color-bronze: #b45309;
-  
+
   /* UI Colors */
-  --color-card-light: #FFFFFF;
-  --color-card-dark: #1E293B;
+  --color-card-light: #ffffff;
+  --color-card-dark: #1e293b;
+  --color-background-light: #f8fafc;
+  --color-background-dark: #0f172a;
+
+  /* Shadows */
+  --shadow-avant: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
 
   /* Animations */
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-slide-up: slide-up 0.5s ease-out;
-  --animate-claw-swipe: claw-swipe 0.3s ease-in-out;
-  --animate-float: float 6s ease-in-out infinite;
   --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-scale-up: scale-up 0.3s ease-out;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-claw-swipe: claw-swipe 0.5s ease-in-out;
 
   @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   @keyframes slide-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  @keyframes claw-swipe {
-    0% { transform: translateX(-10px) rotate(-5deg); }
-    50% { transform: translateX(5px) rotate(5deg); }
-    100% { transform: translateX(0) rotate(0); }
-  }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
+
   @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .5; }
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes scale-up {
+    0% {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  @keyframes claw-swipe {
+    0% {
+      transform: rotate(0deg) scale(1);
+    }
+    25% {
+      transform: rotate(-15deg) scale(1.1);
+    }
+    50% {
+      transform: rotate(10deg) scale(1.1);
+    }
+    75% {
+      transform: rotate(-5deg) scale(1);
+    }
+    100% {
+      transform: rotate(0deg) scale(1);
+    }
   }
 }
 
@@ -80,95 +135,127 @@
 }
 
 @layer components {
-    .container-custom {
-        @apply container mx-auto px-4;
-    }
+  .container-custom {
+    @apply container mx-auto px-4;
+  }
 
-    .dan-badge-custom {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        transition: background-color 300ms ease, color 300ms ease;
-    }
+  .dan-badge-custom {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    transition: background-color 300ms ease, color 300ms ease;
+  }
 
-    .athlete-card:hover .dan-badge-custom {
-        background-color: #0f172a !important;
-        color: #ffffff !important;
-    }
+  .athlete-card:hover .dan-badge-custom {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+  }
 
-    .bg-grid {
-        background-size: 40px 40px;
-        background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                          linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-    }
-    .dark .bg-grid {
-        background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                          linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    }
-            
-    .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #cbd5e1;
-        border-radius: 20px;
-    }
-    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #334155;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: #94a3b8;
-    }
+  .bg-grid {
+    background-size: 40px 40px;
+    background-image:
+      linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  }
+  .dark .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    );
+  }
 
-    /* Glow Effects */
-    .athlete-card .glow-gold,
-    .athlete-card .glow-silver,
-    .athlete-card .glow-bronze,
-    .athlete-card .glow-icon {
-        transition: box-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-    }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #334155;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+  }
 
-    @keyframes glow-pulse-gold {
-        0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.6); }
-        50% { box-shadow: 0 0 25px rgba(234, 179, 8, 0.9); }
-    }
-    @keyframes glow-pulse-silver {
-        0%, 100% { box-shadow: 0 0 15px rgba(148, 163, 184, 0.6); }
-        50% { box-shadow: 0 0 25px rgba(148, 163, 184, 0.9); }
-    }
-    @keyframes glow-pulse-bronze {
-        0%, 100% { box-shadow: 0 0 15px rgba(180, 83, 9, 0.6); }
-        50% { box-shadow: 0 0 25px rgba(180, 83, 9, 0.9); }
-    }
-    @keyframes glow-pulse-icon {
-        0%, 100% { filter: drop-shadow(0 0 8px rgba(234, 179, 8, 0.8)); transform: scale(1.1); }
-        50% { filter: drop-shadow(0 0 15px rgba(234, 179, 8, 1)); transform: scale(1.15); }
-    }
+  /* Glow Effects */
+  .athlete-card .glow-gold,
+  .athlete-card .glow-silver,
+  .athlete-card .glow-bronze,
+  .athlete-card .glow-icon {
+    transition: box-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+  }
 
-    @keyframes status-pulse {
-        0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px currentColor; }
-        50% { opacity: 0.8; transform: scale(1.2); box-shadow: 0 0 12px currentColor; }
+  @keyframes glow-pulse-gold {
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(234, 179, 8, 0.6);
     }
-            
-    .animate-status-pulse {
-        animation: status-pulse 2s infinite ease-in-out;
+    50% {
+      box-shadow: 0 0 25px rgba(234, 179, 8, 0.9);
     }
+  }
+  @keyframes glow-pulse-silver {
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(148, 163, 184, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(148, 163, 184, 0.9);
+    }
+  }
+  @keyframes glow-pulse-bronze {
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(180, 83, 9, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(180, 83, 9, 0.9);
+    }
+  }
+  @keyframes glow-pulse-icon {
+    0%, 100% {
+      filter: drop-shadow(0 0 8px rgba(234, 179, 8, 0.8));
+      transform: scale(1.1);
+    }
+    50% {
+      filter: drop-shadow(0 0 15px rgba(234, 179, 8, 1));
+      transform: scale(1.15);
+    }
+  }
 
-    .athlete-card:hover .glow-gold {
-        animation: glow-pulse-gold 2s infinite ease-in-out;
+  @keyframes status-pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+      box-shadow: 0 0 8px currentColor;
     }
-    .athlete-card:hover .glow-silver {
-        animation: glow-pulse-silver 2s infinite ease-in-out;
+    50% {
+      opacity: 0.8;
+      transform: scale(1.2);
+      box-shadow: 0 0 12px currentColor;
     }
-    .athlete-card:hover .glow-bronze {
-        animation: glow-pulse-bronze 2s infinite ease-in-out;
-    }
-    .athlete-card:hover .glow-icon {
-        animation: glow-pulse-icon 2s infinite ease-in-out;
-    }
+  }
+
+  .animate-status-pulse {
+    animation: status-pulse 2s infinite ease-in-out;
+  }
+
+  .athlete-card:hover .glow-gold {
+    animation: glow-pulse-gold 2s infinite ease-in-out;
+  }
+  .athlete-card:hover .glow-silver {
+    animation: glow-pulse-silver 2s infinite ease-in-out;
+  }
+  .athlete-card:hover .glow-bronze {
+    animation: glow-pulse-bronze 2s infinite ease-in-out;
+  }
+  .athlete-card:hover .glow-icon {
+    animation: glow-pulse-icon 2s infinite ease-in-out;
+  }
 }

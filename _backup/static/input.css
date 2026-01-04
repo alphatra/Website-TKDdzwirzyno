@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 @layer components {
-    .container-custom {
-        @apply container mx-auto px-4;
-    }
+  .container-custom {
+    @apply container mx-auto px-4;
+  }
 
-    /* Custom Badge Styles */
-    .dan-badge-custom {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        /* slate-900 */
-        transition: background-color 300ms ease, color 300ms ease;
-    }
+  /* Custom Badge Styles */
+  .dan-badge-custom {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    /* slate-900 */
+    transition: background-color 300ms ease, color 300ms ease;
+  }
 
-    .athlete-card:hover .dan-badge-custom {
-        background-color: #0f172a !important;
-        /* slate-900 */
-        color: #ffffff !important;
-    }
+  .athlete-card:hover .dan-badge-custom {
+    background-color: #0f172a !important;
+    /* slate-900 */
+    color: #ffffff !important;
+  }
 }

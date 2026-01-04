@@ -1,4 +1,4 @@
-import { MutableRef, useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef } from "preact/hooks";
 
 /**
  * Locks the body scroll by setting overflow: hidden on mount (if isOpen is true)
@@ -12,19 +12,21 @@ export function useScrollLock(isOpen: boolean) {
   const prevPaddingRight = useRef("");
 
   useEffect(() => {
+    if (typeof document === "undefined") return;
     if (!isOpen) return;
 
     lockCount += 1;
     // Only lock on the first modal
     if (lockCount === 1) {
-      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+      const scrollBarWidth = globalThis.innerWidth -
+        document.documentElement.clientWidth;
 
       prevOverflow.current = document.body.style.overflow;
       prevPaddingRight.current = document.body.style.paddingRight;
 
       document.body.style.overflow = "hidden";
       if (scrollBarWidth > 0) {
-          document.body.style.paddingRight = `${scrollBarWidth}px`;
+        document.body.style.paddingRight = `${scrollBarWidth}px`;
       }
     }
 

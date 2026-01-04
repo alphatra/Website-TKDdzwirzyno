@@ -11,7 +11,7 @@ export default define.page(function App({ Component }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link href="https://fonts.googleapis.com" rel="preconnect" />
         <link
-          crossOrigin="true"
+          crossOrigin="anonymous"
           href="https://fonts.gstatic.com"
           rel="preconnect"
         />
@@ -23,9 +23,11 @@ export default define.page(function App({ Component }) {
           href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
           rel="stylesheet"
         />
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
+
+        <script
+          // deno-lint-ignore react-no-danger
+          dangerouslySetInnerHTML={{
+            __html: `
             (function() {
               try {
                 var local = localStorage.getItem('theme');
@@ -38,8 +40,8 @@ export default define.page(function App({ Component }) {
               } catch (e) {}
             })();
           `,
-        }}
-      />
+          }}
+        />
       </head>
       <body>
         <Component />

@@ -1,19 +1,14 @@
-import { useRef, useState, useEffect } from "preact/hooks";
-// HMR Force Update
+import { useEffect, useRef, useState } from "preact/hooks";
 
-
-interface Page {
-  title: string;
-  slug: string;
-}
+import { MenuPageRecord } from "../utils/pocketbase.ts";
 
 interface HeaderProps {
-  menuPages?: Page[];
+  menuPages?: MenuPageRecord[];
 }
 
 import ThemeToggle from "./ThemeToggle.tsx";
-import { useScrollLock } from "./hooks/useScrollLock.ts";
-import { useFocusTrap } from "./hooks/useFocusTrap.ts";
+import { useScrollLock } from "./features/shared/useScrollLock.ts";
+import { useFocusTrap } from "./features/shared/useFocusTrap.ts";
 
 export default function Header({ menuPages = [] }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,15 +16,55 @@ export default function Header({ menuPages = [] }: HeaderProps) {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
 
-  // Static home link + Dynamic Pages from CMS
+  /*
+    Simplified menu handling:
+    1. Define static links
+    2. Map incoming CMS menuPages to {title, slug}
+    3. Deduplicate by slug (prefer static over dynamic if collision, or merge)
+  */
+
   const homeLink = { title: "Start", slug: "" };
-  const allLinks = [homeLink, ...menuPages];
-  
+
+  const staticLinks = [
+    { title: "Kadra", slug: "kadra" },
+    { title: "Zawodnicy", slug: "zawodnicy" },
+    { title: "Aktualności", slug: "aktualnosci" },
+    { title: "Galeria", slug: "galeria" },
+  ];
+
+  // Combine and dedupe
+  const incomingLinks =
+    menuPages?.map((p) => ({ title: p.title, slug: p.slug })) || [];
+
+  // Start with home -> static -> dynamic.
+  // We use a Map to ensure uniqueness by slug.
+  const linksMap = new Map<string, { title: string; slug: string }>();
+
+  // Add Home
+  linksMap.set(homeLink.slug, homeLink);
+
+  // Add Static (these might override home if slug is same, but they are distinct)
+  staticLinks.forEach((link) => linksMap.set(link.slug, link));
+
+  // Add Dynamic
+  incomingLinks.forEach((link) => {
+    if (!linksMap.has(link.slug)) {
+      linksMap.set(link.slug, link);
+    }
+  });
+
+  const allLinks = Array.from(linksMap.values());
+
   const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
 
   // Custom hooks for mobile menu
   useScrollLock(isOpen);
-  useFocusTrap(isOpen, mobileMenuRef, () => setIsOpen(false), firstMobileLinkRef);
+  useFocusTrap(
+    isOpen,
+    mobileMenuRef,
+    () => setIsOpen(false),
+    firstMobileLinkRef,
+  );
 
   // Close on Click Outside
   useEffect(() => {
@@ -37,8 +72,8 @@ export default function Header({ menuPages = [] }: HeaderProps) {
       const target = e.target as Node | null;
       // Close if clicking outside both header (toggle) and menu
       if (
-        isOpen && 
-        headerRef.current && 
+        isOpen &&
+        headerRef.current &&
         !headerRef.current.contains(target) &&
         mobileMenuRef.current &&
         !mobileMenuRef.current.contains(target)
@@ -57,19 +92,21 @@ export default function Header({ menuPages = [] }: HeaderProps) {
   }, [isOpen]);
 
   return (
-    <header 
+    <header
       ref={headerRef}
       class="relative sticky top-0 z-50 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-sm shadow-sm dark:shadow-slate-900/50 transition-all duration-300 border-b border-transparent dark:border-slate-800"
     >
       <nav class="container-custom py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
-            <img src="/logo.svg" alt="TKD Dzwirzyno" class="h-12 w-auto" />
+            <img src="/logo.svg" alt="TKD Dźwirzyno" class="h-12 w-auto" />
             <div>
               <h1 class="text-xl font-heading font-bold text-primary">
-                TKD Dzwirzyno
+                TKD Dźwirzyno
               </h1>
-              <p class="text-xs text-gray-600 dark:text-gray-400">Taekwondo Klub Sportowy</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400">
+                Taekwondo Klub Sportowy
+              </p>
             </div>
           </div>
 
@@ -105,6 +142,7 @@ export default function Header({ menuPages = [] }: HeaderProps) {
           <div class="lg:hidden flex items-center gap-4">
             <ThemeToggle />
             <button
+              type="button"
               ref={toggleBtnRef}
               class="p-2 text-gray-700 dark:text-gray-200 hover:text-primary focus:outline-none"
               onClick={() => setIsOpen(!isOpen)}
@@ -112,35 +150,35 @@ export default function Header({ menuPages = [] }: HeaderProps) {
               aria-label={isOpen ? "Zamknij menu" : "Otwórz menu"}
               aria-controls="mobile-menu"
             >
-            <svg
-              class="w-8 h-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isOpen
-                ? (
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  >
-                  </path>
-                )
-                : (
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  >
-                  </path>
-                )}
-            </svg>
-          </button>
+              <svg
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isOpen
+                  ? (
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    >
+                    </path>
+                  )
+                  : (
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    >
+                    </path>
+                  )}
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
 
         {/* Mobile Menu Dropdown */}
         <div

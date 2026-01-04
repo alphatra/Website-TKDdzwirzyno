@@ -29,18 +29,18 @@ jobs:
           # - _fresh/ : Build output
           # - static/ : Static assets
           # - pocketbase/ : Structure only (binary/data excluded by .gitignore but we need the dir structure if not handled by script)
-          #                 Actually script creates dir, but let's include non-ignored files if any. 
+          #                 Actually script creates dir, but let's include non-ignored files if any.
           # - deno.json, deno.lock : Runtime config
           # - node_modules/ : Dependencies
           # - main.ts, dev.ts, etc. : Entrypoints
-          
-          # We purposefully exclude .git, .github, and raw source files if not needed, 
+
+          # We purposefully exclude .git, .github, and raw source files if not needed,
           # but for a Deno app, source files are often needed at runtime if not fully bundled to a single file.
           # Since Fresh + Vite might be different, usually we need the source for the server to run islands/routes.
           # So we pack everything except what is ignored or hidden.
-          
+
           # Using git archive to respect .gitignore would be clean, but we need the build artifacts (_fresh, node_modules) which are ignored.
-          
+
           tar -czf release.tar.gz \
             --exclude='.git' \
             --exclude='.github' \

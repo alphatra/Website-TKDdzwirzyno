@@ -1,54 +1,51 @@
-// @deno-types="npm:@types/sanitize-html"
-import sanitizeHtml from "sanitize-html";
 import { define } from "../../utils.ts";
-import { Head } from "fresh/runtime";
-import pb from "../../utils/pb.ts";
-import GalleryIsland from "../../islands/Gallery.tsx";
-import { HttpError } from "fresh";
+import {
+  type AlbumRecord,
+  pb,
+  type PhotoRecord,
+} from "../../utils/pocketbase.ts";
+import GalleryIsland from "../../islands/features/gallery/Gallery.tsx";
+import { PageShell } from "../../components/layout/PageShell.tsx";
+import { ErrorState } from "../../components/ui/ErrorState.tsx";
+import { EmptyState } from "../../components/ui/EmptyState.tsx";
+import { sanitize } from "../../utils/sanitize.ts";
 
-interface Album {
-  id: string;
-  title: string;
-  description: string;
-  collectionId: string;
-}
-
-interface Photo {
-  id: string;
-  image: string;
-  caption: string;
-  collectionId: string;
-}
+// ... (existing imports/interface code)
 
 export default define.page(async function AlbumView(props) {
-  const id = props.params.id;
-  let album: Album | null = null;
-  let photos: Photo[] = [];
+  const { id } = props.params;
+  const { menuPages } = props.state;
+  let album: AlbumRecord | null = null;
+  let photos: PhotoRecord[] = [];
 
   try {
-      album = await pb.collection("albums").getOne<Album>(id);
-      const photosResult = await pb.collection("photos").getList<Photo>(1, 100, {
-        filter: `album = "${id}"`,
-      });
-      photos = photosResult.items;
-  } catch (e) {
-      console.error("Error fetching album:", e);
-      // In a real app we might want to throw a 404 here or return a specific 404 component
-      // throw new HttpError(404); 
+    const [albumRes, photosRes] = await Promise.all([
+      pb.collection("albums").getOne<AlbumRecord>(id),
+      pb.collection("photos").getList<PhotoRecord>(1, 50, {
+        filter: `album="${id}"`,
+        sort: "created",
+      }),
+    ]);
+    album = albumRes;
+    photos = photosRes.items;
+  } catch (_e) {
+    // console.warn("Album fetch error", _e);
   }
 
   if (!album) {
-      return (
-          <div class="min-h-screen bg-slate-900 text-white flex items-center justify-center">
-              <div class="text-center">
-                  <h1 class="text-4xl font-bold mb-4">Nie znaleziono albumu</h1>
-                  <a href="/galeria" class="text-primary hover:underline">Powrót do galerii</a>
-              </div>
-          </div>
-      )
+    // ... (error state remains same)
+    return (
+      <PageShell title="Błąd - TKD Dźwirzyno" menuPages={menuPages}>
+        <ErrorState
+          title="Nie znaleziono albumu"
+          message="Podany album nie istnieje."
+          homeLink
+        />
+      </PageShell>
+    );
   }
 
-  // Transform photos for the Gallery Island
+  // Transform photos logic remains same...
   const galleryItems = photos.map((p) => ({
     id: p.id,
     title: p.caption || "Zdjęcie",
@@ -56,54 +53,62 @@ export default define.page(async function AlbumView(props) {
     collectionId: p.collectionId,
   }));
 
-  const cleanDescription = sanitizeHtml(album.description, {
-      allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ]),
-      allowedAttributes: {
-          ...sanitizeHtml.defaults.allowedAttributes,
-          'img': [ 'src', 'alt', 'class' ]
-      }
-  });
+  const cleanDescription = sanitize(album.description, "album");
+
+  const ogImage = photos.length > 0
+    ? `/api/files/${photos[0].collectionId}/${photos[0].id}/${photos[0].image}`
+    : "/static/bg_hero.jpg";
 
   return (
-    <div class="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-emerald-500/30">
+    <PageShell
+      title={`${album.title} - TKD Dźwirzyno`}
+      description={`Album zdjęć: ${album.title}`}
+      menuPages={menuPages}
+      ogImage={ogImage}
+      ogType="article"
+    >
+      <div class="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-emerald-500/30">
         <div class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-body min-h-screen relative">
-            <div class="absolute inset-0 z-0 bg-grid opacity-40 pointer-events-none"></div>
+          <div class="absolute inset-0 z-0 bg-grid opacity-40 pointer-events-none">
+          </div>
 
-      <div class="relative z-10 bg-slate-900 text-white py-12 border-b border-slate-800">
-        <div class="container mx-auto px-4">
-          <a
-            href="/galeria"
-            class="inline-flex items-center text-slate-400 hover:text-white mb-6 transition-colors font-bold uppercase tracking-wider text-xs group"
-          >
-            <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center mr-3 group-hover:bg-primary transition-colors">
-                <span class="material-icons-round text-sm group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+          <div class="relative z-10 bg-slate-900 text-white py-12 border-b border-slate-800">
+            <div class="container mx-auto px-4">
+              <a
+                href="/galeria"
+                class="inline-flex items-center text-slate-400 hover:text-white mb-6 transition-colors font-bold uppercase tracking-wider text-xs group"
+              >
+                <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center mr-3 group-hover:bg-primary transition-colors">
+                  <span class="material-icons-round text-sm group-hover:-translate-x-0.5 transition-transform">
+                    arrow_back
+                  </span>
+                </div>
+                Powrót do Galerii
+              </a>
+              <h1 class="text-3xl md:text-5xl font-heading font-bold mb-4 text-white">
+                {album.title}
+              </h1>
+              <div
+                class="prose prose-invert max-w-none text-slate-400 font-light"
+                // deno-lint-ignore react-no-danger
+                dangerouslySetInnerHTML={{ __html: cleanDescription }}
+              />
             </div>
-            Powrót do Galerii
-          </a>
-          <h1 class="text-3xl md:text-5xl font-heading font-bold mb-4 text-white">
-            {album.title}
-          </h1>
-          {/* deno-lint-ignore react-no-danger */}
-          <div
-            class="prose prose-invert max-w-none text-slate-400 font-light"
-            dangerouslySetInnerHTML={{ __html: cleanDescription }}
-          />
+          </div>
+
+          <div class="container mx-auto px-4 py-12 relative z-20">
+            {galleryItems.length === 0
+              ? (
+                <EmptyState
+                  title="Ten album jest pusty"
+                  message="Zdjęcia pojawią się wkrótce."
+                  icon="photo_library"
+                />
+              )
+              : <GalleryIsland items={galleryItems} />}
+          </div>
         </div>
       </div>
-
-      <div class="container mx-auto px-4 py-12 relative z-20">
-        {galleryItems.length === 0
-          ? (
-            <div class="text-center py-20">
-               <div class="text-6xl mb-6 opacity-50 grayscale">📂</div>
-              <p class="text-slate-500 text-xl font-light">
-                Ten album jest pusty.
-              </p>
-            </div>
-          )
-          : <GalleryIsland items={galleryItems} />}
-      </div>
-      </div>
-    </div>
+    </PageShell>
   );
 });

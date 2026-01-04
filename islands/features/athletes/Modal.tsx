@@ -1,10 +1,12 @@
-
 import { useRef } from "preact/hooks";
-import { type JSX } from "preact";
-import { Athlete } from "../utils/types.ts";
-import { parseRank } from "../utils/rank.ts";
-import { useScrollLock } from "./hooks/useScrollLock.ts";
-import { useFocusTrap } from "./hooks/useFocusTrap.ts";
+import { Athlete } from "../../../utils/types.ts";
+import { MedalDisplay } from "../../../components/athletes/MedalDisplay.tsx";
+import { parseRank } from "../../../utils/rank.ts";
+import { useScrollLock } from "../shared/useScrollLock.ts";
+import { useFocusTrap } from "../shared/useFocusTrap.ts";
+import { useOutsideClick } from "../shared/useOutsideClick.ts";
+import Toast from "../../ui/Toast.tsx";
+import { useState } from "preact/hooks";
 
 interface AthleteModalProps {
   athlete: Athlete | null;
@@ -17,31 +19,34 @@ export default function AthleteModal(
 ) {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null); // Keep this ref for initial focus
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Use custom hooks for robust behavior
   useScrollLock(isOpen);
   useFocusTrap(isOpen, modalRef, onClose, closeButtonRef);
 
   // Handle Outside Click
-  const handleBackdropPointerDown: JSX.PointerEventHandler<HTMLDivElement> = (e) => {
-    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
-    }
-  };
+  // Handle Outside Click
+  const { handlePointerDown, handlePointerUp } = useOutsideClick(
+    modalRef,
+    onClose,
+    isOpen,
+  );
 
   // Handle Share
   const handleShare = async () => {
     if (!athlete) return;
-    
+
     // Ensure URL has the athlete param (it should from the grid, but safe to be sure)
-    const url = new URL(window.location.href);
+    const url = new URL(globalThis.location.href);
     if (!url.searchParams.has("athlete")) {
-       url.searchParams.set("athlete", athlete.id);
+      url.searchParams.set("athlete", athlete.id);
     }
 
     const shareData = {
       title: `${athlete.name} - TKD Dźwirzyno`,
-      text: `Sprawdź osiągnięcia zawodnika ${athlete.name} w Klubie Taekwondo Dźwirzyno!`,
+      text:
+        `Sprawdź osiągnięcia zawodnika ${athlete.name} w Klubie Taekwondo Dźwirzyno!`,
       url: url.toString(),
     };
 
@@ -53,13 +58,11 @@ export default function AthleteModal(
       }
     } else {
       try {
-        await navigator.clipboard.writeText(
-          `${shareData.title}\n${shareData.text}\n${shareData.url}`,
-        );
-        alert("Skopiowano link do schowka!");
+        await navigator.clipboard.writeText(shareData.url);
+        setToastMessage("Skopiowano link do schowka!");
       } catch (err) {
         console.error("Clipboard error:", err);
-        alert("Nie udało się udostępnić.");
+        setToastMessage("Nie udało się udostępnić.");
       }
     }
   };
@@ -71,8 +74,6 @@ export default function AthleteModal(
   const names = athlete.name.split(" ");
   const firstName = names[0];
   const lastName = names.length > 1 ? names.slice(1).join(" ") : ""; // Handle single names
-  const totalMedals = (athlete.stats?.gold || 0) +
-    (athlete.stats?.silver || 0) + (athlete.stats?.bronze || 0);
 
   // Status mapping
   const statusMap: Record<string, {
@@ -116,7 +117,8 @@ export default function AthleteModal(
       role="dialog"
       aria-labelledby="modal-athlete-name"
       aria-describedby={athlete.bio ? "modal-athlete-bio" : undefined}
-      onPointerDown={handleBackdropPointerDown}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
     >
       <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-md transition-opacity duration-300">
       </div>
@@ -126,6 +128,7 @@ export default function AthleteModal(
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          type="button"
           ref={closeButtonRef}
           onClick={onClose}
           aria-label="Zamknij"
@@ -143,6 +146,8 @@ export default function AthleteModal(
                 <img
                   src={`/api/files/${athlete.collectionId}/${athlete.id}/${athlete.image}`}
                   alt={athlete.name}
+                  decoding="async"
+                  fetchPriority="high"
                   class="w-full h-full object-cover object-top opacity-60 mix-blend-screen md:mix-blend-normal md:opacity-50 grayscale contrast-125 transition-transform duration-[20s] ease-linear group-hover/hero:scale-110 origin-center"
                 />
               )
@@ -174,7 +179,10 @@ export default function AthleteModal(
               </div>
             </div>
             <div class="mb-8">
-              <h2 id="modal-athlete-name" class="font-display text-4xl md:text-5xl font-black text-white leading-[0.9] tracking-tight mb-3 drop-shadow-lg">
+              <h2
+                id="modal-athlete-name"
+                class="font-display text-4xl md:text-5xl font-black text-white leading-[0.9] tracking-tight mb-3 drop-shadow-lg"
+              >
                 {firstName}
                 <br />
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-slate-500">
@@ -205,47 +213,17 @@ export default function AthleteModal(
                 <span class="text-6xl text-primary/40 font-serif absolute -top-8 -left-4 leading-none select-none">
                   “
                 </span>
-                <p id="modal-athlete-bio" class="font-body font-light italic text-slate-300 text-lg leading-relaxed relative z-10 pl-2 border-l-2 border-primary/30 line-clamp-4">
+                <p
+                  id="modal-athlete-bio"
+                  class="font-body font-light italic text-slate-300 text-lg leading-relaxed relative z-10 pl-2 border-l-2 border-primary/30 line-clamp-4"
+                >
                   {athlete.bio}
                 </p>
               </div>
             )}
 
-            {/* Stats Grid (Replacing Age/Cat with Medals for now) */}
-            <div class="grid grid-cols-2 gap-y-6 gap-x-4 border-t border-slate-700/50 pt-6 backdrop-blur-sm bg-slate-900/30 -mx-4 px-4 rounded-xl">
-              <div>
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-500 block mb-1">
-                  Złoto
-                </span>
-                <span class="font-display text-lg font-bold text-white">
-                  {athlete.stats?.gold || 0}
-                </span>
-              </div>
-              <div>
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-500 block mb-1">
-                  Srebro
-                </span>
-                <span class="font-display text-lg font-bold text-white">
-                  {athlete.stats?.silver || 0}
-                </span>
-              </div>
-              <div>
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-500 block mb-1">
-                  Brąz
-                </span>
-                <span class="font-display text-lg font-bold text-white">
-                  {athlete.stats?.bronze || 0}
-                </span>
-              </div>
-              <div>
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-500 block mb-1">
-                  Razem
-                </span>
-                <span class="font-display text-lg font-bold text-white">
-                  {totalMedals}
-                </span>
-              </div>
-            </div>
+            {/* Stats Grid */}
+            <MedalDisplay stats={athlete.stats} variant="grid" />
           </div>
         </div>
 
@@ -350,23 +328,29 @@ export default function AthleteModal(
 
           <div class="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm flex justify-between items-center z-20">
             <button
+              type="button"
               onClick={handleShare}
               class="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex items-center gap-2"
             >
               <span class="material-icons-round text-base">share</span>
               Udostępnij
             </button>
-            <button class="group flex items-center gap-3 pl-6 pr-4 py-2 rounded-full bg-primary/10 hover:bg-primary hover:text-white text-primary transition-all duration-300">
+            <a
+              href="/zawodnicy"
+              onClick={onClose}
+              class="group flex items-center gap-3 pl-6 pr-4 py-2 rounded-full bg-primary/10 hover:bg-primary hover:text-white text-primary transition-all duration-300"
+            >
               <span class="text-xs font-bold uppercase tracking-widest">
                 Pełna baza
               </span>
               <span class="material-icons-round text-lg group-hover:translate-x-1 transition-transform">
                 arrow_forward
               </span>
-            </button>
+            </a>
           </div>
         </div>
       </div>
+      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
     </div>
   );
 }
