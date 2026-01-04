@@ -2,7 +2,8 @@ export const SITE_CONFIG = {
   name: "TKD Dźwirzyno",
   description: "Klub Taekwondo Dźwirzyno - Treningi, zawody, pasja. Budujemy charakter, siłę i dyscyplinę.",
   url: "https://tkd-dzwirzyno.pl", // Replace with actual production URL if different
-  ogImage: "/logo.png",
+  logo: "/LOGO_TKD_DZWIRZYNO.jpg",
+  ogImage: "/LOGO_TKD_DZWIRZYNO.jpg",
   contact: {
     phone: "+48 600 000 000",
     email: "kontakt@tkd-dzwirzyno.pl",

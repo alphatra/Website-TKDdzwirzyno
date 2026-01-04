@@ -11,16 +11,19 @@ export default function Toast(
 ) {
   const [visible, setVisible] = useState(false);
 
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
   useEffect(() => {
     if (message) {
       setVisible(true);
       const timer = setTimeout(() => {
         setVisible(false);
-        setTimeout(onClose, 300); // Wait for fade out animation
+        setTimeout(() => onCloseRef.current(), 300); // Wait for fade out animation
       }, duration);
       return () => clearTimeout(timer);
     }
-  }, [message, duration, onClose]);
+  }, [message, duration]);
 
   if (!message && !visible) return null;
 

@@ -89,7 +89,7 @@ export default define.page(function Home(props) {
 
             <div class="relative z-10 w-full aspect-[4/5] bg-gradient-to-br from-gray-800 to-black skew-x-[-6deg] shadow-2xl border-t border-l border-white/10 overflow-hidden group">
                {/* Image Placeholder or Actual Hero Image */}
-               <div class="absolute inset-0 bg-[url('/static/hero-fighter.jpg')] bg-cover bg-center grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700 ease-out scale-105 group-hover:scale-110"></div>
+               <div class="absolute inset-0 bg-[url('/static/logo.jpg')] bg-cover bg-center grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700 ease-out scale-105 group-hover:scale-110"></div>
                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
                
                <div class="absolute bottom-8 left-8 right-8">
@@ -257,7 +257,7 @@ export default define.page(function Home(props) {
       {/* CTA Section */}
       <section class="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-secondary-900 group">
           {/* Parallax Background using pseudo-elements or absolute divs since we want it simple/bold */}
-          <div class="absolute inset-0 bg-[url('/static/hero-fighter.jpg')] bg-cover bg-center opacity-30 grayscale transition-transform duration-[3s] group-hover:scale-110"></div>
+          <div class="absolute inset-0 bg-[url('/static/logo.jpg')] bg-cover bg-center opacity-30 grayscale transition-transform duration-[3s] group-hover:scale-110"></div>
           <div class="absolute inset-0 bg-gradient-to-r from-secondary-900 via-secondary-900/80 to-primary-900/80"></div>
           
           <div class="relative z-10 container-custom text-center">

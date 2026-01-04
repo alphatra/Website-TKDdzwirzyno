@@ -71,7 +71,7 @@ export default define.page(async function Zawodnicy(props) {
       const stats = { gold, silver, bronze };
 
       // Results are already sorted from DB and Map insertion
-      const recentResults = athleteResults.slice(0, 3);
+      const recentResults = athleteResults;
 
       return {
         ...athlete,

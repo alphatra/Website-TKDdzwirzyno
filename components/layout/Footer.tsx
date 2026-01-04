@@ -12,31 +12,46 @@ export function Footer() {
           {/* Brand Column */}
           <div class="md:col-span-1">
             <a href="/" class="block mb-6 group">
-              <h2 class="text-4xl font-heading font-black tracking-tighter leading-none relative inline-block">
-                <span class="text-secondary-900 dark:text-white relative z-10 group-hover:text-primary transition-colors">TKD</span>
-                <span class="absolute top-1 left-1 text-transparent text-outline-dark dark:text-outline opacity-30 group-hover:translate-x-1 group-hover:translate-y-1 transition-transform">TKD</span>
-              </h2>
-              <p class="text-xs font-mono text-gray-500 uppercase tracking-widest mt-2 group-hover:text-secondary-900 dark:group-hover:text-white transition-colors">
-                Dźwirzyno
-              </p>
+              <div class="flex items-center gap-3">
+                 <img src={SITE_CONFIG.logo} alt={SITE_CONFIG.name} class="h-16 w-auto" />
+                 <div>
+                    <h2 class="text-2xl font-heading font-black tracking-tighter leading-none text-secondary-900 dark:text-white group-hover:text-primary transition-colors">
+                      TKD
+                    </h2>
+                    <p class="text-xs font-mono text-gray-500 uppercase tracking-widest mt-1 group-hover:text-secondary-900 dark:group-hover:text-white transition-colors">
+                      Dźwirzyno
+                    </p>
+                 </div>
+              </div>
             </a>
             <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">
               {SITE_CONFIG.description}
             </p>
             <div class="flex gap-4">
-              {/* Social Icons Placeholder */}
-              {Object.entries(SITE_CONFIG.social).map(([platform, url]) => (
-                <a
-                  key={platform}
-                  href={url}
-                  class="w-10 h-10 border border-secondary-200 dark:border-white/10 flex items-center justify-center rounded-full hover:bg-primary hover:border-primary transition-all group"
-                  aria-label={platform}
+              {/* Facebook Icon */}
+              <a
+                href={SITE_CONFIG.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-10 h-10 border border-secondary-200 dark:border-white/10 flex items-center justify-center rounded-full hover:bg-primary hover:border-primary transition-all group relative overflow-hidden"
+                aria-label="Facebook"
+              >
+                <div class="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="relative z-10 text-secondary-900 dark:text-white group-hover:text-white transition-colors"
                 >
-                  <span class="text-xs font-mono uppercase group-hover:animate-ping opacity-75 group-hover:text-white">
-                    {platform.slice(0, 2)}
-                  </span>
-                </a>
-              ))}
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg>
+              </a>
             </div>
           </div>
 

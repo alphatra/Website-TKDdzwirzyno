@@ -1,11 +1,10 @@
 import { define } from "../utils.ts";
 import { PageShell } from "../components/layout/PageShell.tsx";
 import { SiteInfoRecord } from "../utils/pocketbase.ts";
+import { SITE_CONFIG } from "../utils/siteConfig.ts";
 
 export default define.page(function Kontakt(props) {
   const { menuPages, siteInfo } = props.state;
-  // Cast siteInfo to SiteInfoRecord safely if needed, though middleware types should handle it in app state ideally.
-  // We'll treat it as SiteInfoRecord | null
   const info = siteInfo as SiteInfoRecord | null;
 
   const address = info?.address ||
@@ -15,117 +14,109 @@ export default define.page(function Kontakt(props) {
 
   return (
     <PageShell
-      title="Kontakt - TKD Dzwirzyno"
+      title="Kontakt - TKD Dźwirzyno"
       description="Skontaktuj się z nami. Dołącz do treningów w Dźwirzynie."
       menuPages={menuPages}
     >
-      <div class="min-h-screen bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 relative overflow-hidden">
-        {/* Helper Gradient */}
-        <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <div class="absolute -top-[20%] -right-[10%] w-[70vw] h-[70vw] bg-primary/5 rounded-full blur-[100px] dark:bg-primary/10" />
-          <div class="absolute top-[40%] -left-[10%] w-[50vw] h-[50vw] bg-secondary/5 rounded-full blur-[100px] dark:bg-secondary/10" />
-        </div>
+      <div class="min-h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden relative">
+        {/* Background Grid & Mesh */}
+        <div class="absolute inset-0 bg-grid opacity-[0.4] pointer-events-none" />
+        <div class="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
+        <div class="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-secondary/10 dark:bg-white/5 blur-[120px] rounded-full pointer-events-none" />
 
-        {/* Hero Section */}
-        <section class="relative pt-32 pb-20 px-4 z-10">
-          <div class="container-custom text-center">
-            <span class="text-primary text-xs font-bold tracking-[0.2em] uppercase mb-4 block animate-slide-up">
-              Lokalizacja & Kontakt
-            </span>
-            <h1 class="font-display text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6 animate-slide-up animation-delay-100">
-              Trenuj z{" "}
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-                Nami
-              </span>
+        <div class="container-custom relative z-10 pt-32 pb-20">
+          {/* Avant-Garde Header */}
+          <header class="mb-16">
+            <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter text-slate-900 dark:text-white mb-4">
+              Kon<span class="text-primary">takt</span>
             </h1>
-            <p class="text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-light animate-slide-up animation-delay-200">
-              Zapraszamy na treningi do naszej sali w Gminnym Ośrodku Sportu i
-              Rekreacji.
+            <div class="w-16 h-1.5 bg-primary mb-6" />
+            <p class="text-lg md:text-xl font-light text-slate-600 dark:text-slate-400 max-w-2xl">
+              Masz pytania? Chcesz dołączyć? <br />
+              <span class="font-bold text-slate-900 dark:text-white">
+                Twoja droga wojownika zaczyna się tutaj.
+              </span>
             </p>
-          </div>
-        </section>
+          </header>
 
-        {/* Contact Grid */}
-        <section class="relative pb-32 px-4 z-10">
-          <div class="container-custom">
-            <div class="grid lg:grid-cols-2 gap-12 xl:gap-20 items-stretch">
-              {/* Info Card */}
-              <div class="bg-slate-50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-100 dark:border-slate-800 rounded-3xl p-8 md:p-12 flex flex-col justify-center space-y-12 shadow-xl">
-                {/* Address */}
-                <div class="flex items-start gap-6 group">
-                  <div class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform duration-300">
-                    <span class="material-icons-round text-3xl">
-                      location_on
-                    </span>
-                  </div>
-                  <div>
-                    <h3 class="font-heading text-xl font-bold mb-2 text-slate-900 dark:text-white">
-                      Adres
-                    </h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">
-                      {address}
-                    </p>
-                  </div>
+          <div class="grid lg:grid-cols-12 gap-12 lg:gap-20">
+            {/* Contact Details Column */}
+            <div class="lg:col-span-5 space-y-10">
+              {/* Address Card */}
+              <div class="group">
+                <h3 class="font-heading text-base text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-3">
+                  <span class="w-6 h-[1px] bg-primary" /> Lokalizacja
+                </h3>
+                <div class="bg-white dark:bg-slate-800/50 backdrop-blur border-l-4 border-slate-200 dark:border-slate-700 hover:border-primary transition-colors duration-300 p-6">
+                  <p class="font-display text-xl font-bold text-slate-900 dark:text-white whitespace-pre-line leading-relaxed">
+                    {address}
+                  </p>
                 </div>
+              </div>
 
+              {/* Direct Contact Grid */}
+              <div class="grid sm:grid-cols-2 gap-8">
                 {/* Phone */}
-                <div class="flex items-start gap-6 group">
-                  <div class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform duration-300">
-                    <span class="material-icons-round text-3xl">phone</span>
-                  </div>
-                  <div>
-                    <h3 class="font-heading text-xl font-bold mb-2 text-slate-900 dark:text-white">
-                      Telefon
-                    </h3>
-                    <p class="text-slate-600 dark:text-slate-400 mb-2">
-                      Trener Główny
-                    </p>
-                    <a
-                      href={`tel:${phone.replace(/\s/g, "")}`}
-                      class="text-xl font-bold hover:text-primary transition-colors"
-                    >
-                      {phone}
-                    </a>
-                  </div>
+                <div class="group">
+                  <h3 class="font-heading text-xs text-slate-400 uppercase tracking-widest mb-2">
+                    Telefon
+                  </h3>
+                  <a
+                    href={`tel:${phone.replace(/\s/g, "")}`}
+                    class="block font-display text-lg font-bold text-slate-900 dark:text-white hover:text-primary transition-colors"
+                  >
+                    {phone}
+                  </a>
+                  <span class="text-xs text-slate-500 mt-1 block">
+                    Trener Główny
+                  </span>
                 </div>
 
                 {/* Email */}
-                <div class="flex items-start gap-6 group">
-                  <div class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform duration-300">
-                    <span class="material-icons-round text-3xl">email</span>
-                  </div>
-                  <div>
-                    <h3 class="font-heading text-xl font-bold mb-2 text-slate-900 dark:text-white">
-                      Email
-                    </h3>
-                    <a
-                      href={`mailto:${email}`}
-                      class="text-lg hover:text-primary transition-colors"
-                    >
-                      {email}
-                    </a>
-                  </div>
+                <div class="group">
+                  <h3 class="font-heading text-xs text-slate-400 uppercase tracking-widest mb-2">
+                    Email
+                  </h3>
+                  <a
+                    href={`mailto:${email}`}
+                    class="block font-display text-lg font-bold text-slate-900 dark:text-white hover:text-primary transition-colors break-words"
+                  >
+                    {email}
+                  </a>
+                  <span class="text-xs text-slate-500 mt-1 block">
+                    Odpowiadamy w 24h
+                  </span>
                 </div>
               </div>
 
-              {/* Map */}
-              <div class="relative min-h-[400px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2360.596637841347!2d15.41444431585888!3d54.15222218015794!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465494a5c5555555%3A0x5555555555555555!2sGminne%20Centrum%20Sportu%20i%20Turystyki!5e0!3m2!1spl!2spl!4v1620000000000!5m2!1spl!2spl"
-                  width="100%"
-                  height="100%"
-                  style="border:0; filter: grayscale(1) contrast(1.2) opacity(0.9);"
-                  loading="lazy"
-                  allowFullScreen
-                >
-                </iframe>
-                {/* Overlay for interaction hint if needed or style matching */}
-                <div class="absolute inset-0 pointer-events-none shadow-[inset_0_0_50px_rgba(0,0,0,0.1)]">
-                </div>
-              </div>
+               {/* Training Schedule Teaser / CTA */}
+               <div class="bg-primary text-white p-6 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+                  <div class="absolute inset-0 bg-slate-900/10 transform skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                  <h3 class="font-display text-xl font-bold mb-2 relative z-10">Pierwszy Trening</h3>
+                  <p class="mb-4 opacity-90 relative z-10 text-sm">Przyjdź i sprawdź swoje możliwości za darmo.</p>
+                  <div class="inline-flex items-center gap-2 font-bold uppercase tracking-wider text-xs border-b-2 border-white/30 pb-1 relative z-10">
+                    Zobacz grafik <span class="material-icons-round text-sm">arrow_forward</span>
+                  </div>
+               </div>
+            </div>
+
+            {/* Map Column */}
+            <div class="lg:col-span-7 h-[500px] lg:h-auto min-h-[500px] relative">
+               <div class="absolute inset-0 bg-slate-200 dark:bg-slate-800 transform translate-x-4 translate-y-4 lg:translate-x-6 lg:translate-y-6" />
+               <div class="absolute inset-0 z-10 border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
+                  <iframe
+                    src={`https://maps.google.com/maps?q=${SITE_CONFIG.contact.geo.lat},${SITE_CONFIG.contact.geo.lng}&z=15&output=embed`}
+                    width="100%"
+                    height="100%"
+                    style="border:0;"
+                    loading="lazy"
+                    allowFullScreen
+                  >
+                  </iframe>
+               </div>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </PageShell>
   );

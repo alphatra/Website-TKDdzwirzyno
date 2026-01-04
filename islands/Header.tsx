@@ -99,7 +99,7 @@ export default function Header({ menuPages = [] }: HeaderProps) {
       <nav class="container-custom py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
-            <img src="/logo.svg" alt="TKD Dźwirzyno" class="h-12 w-auto" />
+            <img src="/LOGO_TKD_DZWIRZYNO.jpg" alt="TKD Dźwirzyno" class="h-12 w-auto" />
             <div>
               <h1 class="text-xl font-heading font-bold text-primary">
                 TKD Dźwirzyno

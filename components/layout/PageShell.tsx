@@ -31,7 +31,7 @@ export function PageShell({
   noHeader = false,
   className = "",
   footer,
-  ogImage = "/logo.png", // Default logo
+  ogImage = "/LOGO_TKD_DZWIRZYNO.jpg", // Default logo
   ogType = "website",
   canonicalUrl,
   noIndex = false,
@@ -78,7 +78,7 @@ export function PageShell({
       {!noHeader && <Header menuPages={menuPages} />}
       <GlobalErrorBoundary>
         <main
-          class={`min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white transition-colors duration-300 ${className}`}
+          class={`min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white transition-colors duration-300 animate-page-enter ${className}`}
         >
           {children}
         </main>

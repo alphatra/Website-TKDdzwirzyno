@@ -1,3 +1,4 @@
+import { FunctionalComponent } from "preact";
 import { Athlete } from "../../utils/types.ts";
 import { parseRank } from "../../utils/rank.ts";
 import { MedalDisplay } from "./MedalDisplay.tsx";
@@ -7,7 +8,7 @@ interface AthleteCardProps {
   onClick: (athlete: Athlete) => void;
 }
 
-export function AthleteCard({ athlete, onClick }: AthleteCardProps) {
+export const AthleteCard: FunctionalComponent<AthleteCardProps> = ({ athlete, onClick }) => {
   const { number: rankNumber, type: rankType, rank } = parseRank(athlete.rank);
 
   // Robust splitting to handle NBSP and multiple spaces
@@ -50,7 +51,7 @@ export function AthleteCard({ athlete, onClick }: AthleteCardProps) {
                 )
                 : (
                   <div class="w-full h-full rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary font-display font-bold text-sm">
-                    {athlete.name.split(" ").map((n) => n[0]).join("")
+                    {athlete.name.split(" ").map((n, i) => <span key={i}>{n[0]}</span>)
                       .slice(0, 2)}
                   </div>
                 )}

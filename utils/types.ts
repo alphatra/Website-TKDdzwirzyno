@@ -10,6 +10,7 @@ export interface Result extends
   > {
   expand?: {
     competition?: {
+      id: string;
       name: string;
       year: number;
       date?: string;
