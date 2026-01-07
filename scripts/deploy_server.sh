@@ -15,6 +15,8 @@ mkdir -p "$NEW_RELEASE_DIR"
 # extract the tarball passed via stdin to the new release directory
 echo "Extracting release to ${NEW_RELEASE_DIR}..."
 tar -xzf - -C "$NEW_RELEASE_DIR"
+# Ensure permissions are correct for Nginx
+chmod -R 755 "$NEW_RELEASE_DIR"
 
 # Symlink persistent storage and configuration
 echo "Linking persistent data..."
