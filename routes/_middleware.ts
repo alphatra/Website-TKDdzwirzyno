@@ -2,6 +2,17 @@ import { FreshContext } from "fresh";
 import pb from "../utils/client.ts";
 import { NewsRecord, SiteInfoRecord } from "../utils/pocketbase.ts";
 
+// Initialize Deno KV (conditional for dev/build environments)
+let kv: Deno.Kv | null = null;
+try {
+  if (typeof Deno.openKv === "function") {
+    // @ts-ignore: Deno.openKv might not be recognized in all configs
+    kv = await Deno.openKv();
+  }
+} catch (e) {
+  console.warn("KV warning:", e);
+}
+
 // Simple in-memory cache
 let cachedSiteInfo: SiteInfoRecord | null = null;
 // deno-lint-ignore no-explicit-any
@@ -39,6 +50,21 @@ export async function handler(ctx: FreshContext) {
 
   // Check cache
   const now = Date.now();
+
+  // --- Page View Counter (Deno KV) ---
+  // Count only GET requests to actual pages (not static assets, already filtered above)
+  if (req.method === "GET" && kv) {
+    try {
+      // Fire and forget - do not await to keep response fast
+      kv.atomic()
+        .sum(["site_views", url.pathname], 1n)
+        .commit()
+        .catch((e) => console.error("KV Error:", e));
+    } catch (e) {
+      console.error("KV access error:", e);
+    }
+  }
+  // -----------------------------------
   if (now - lastCacheTime > CACHE_TTL_MS) {
     try {
       const [infoRes, pagesRes, newsRes] = await Promise.all([
