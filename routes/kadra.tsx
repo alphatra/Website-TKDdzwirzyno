@@ -63,7 +63,7 @@ export default define.page(async function KadraPage(props) {
       title="Kadra Trenerska - TKD Dzwirzyno"
       description="Poznaj naszych trenerów i instruktorów."
       menuPages={menuPages}
-      ogImage="/static/logo.png"
+      ogImage="/logo.jpg"
       ogType="website"
     >
       <div class="min-h-screen bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 selection:bg-primary selection:text-white overflow-hidden relative transition-colors duration-300">

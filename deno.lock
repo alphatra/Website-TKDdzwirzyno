@@ -1526,6 +1526,7 @@
     "dependencies": [
       "jsr:@fresh/core@^2.2.0",
       "jsr:@fresh/plugin-vite@^1.0.8",
+      "jsr:@std/http@*",
       "npm:@preact/signals@^2.5.0",
       "npm:@tailwindcss/vite@^4.1.12",
       "npm:@types/sanitize-html@*",

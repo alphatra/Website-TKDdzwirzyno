@@ -23,7 +23,8 @@
     "pocketbase": "npm:pocketbase",
     "nodemailer": "npm:nodemailer@6.9.13",
     "sanitize-html": "npm:sanitize-html",
-    "@types/sanitize-html": "npm:@types/sanitize-html"
+    "@types/sanitize-html": "npm:@types/sanitize-html",
+    "@std/http": "jsr:@std/http"
   },
   "compilerOptions": {
     "lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns"],

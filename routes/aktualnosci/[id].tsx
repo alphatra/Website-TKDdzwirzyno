@@ -34,7 +34,7 @@ export default define.page(async (props) => {
 
   const ogImage = newsItem.image
     ? pb.files.getUrl(newsItem, newsItem.image)
-    : "/static/logo.png";
+    : "/logo.jpg";
 
   return (
     <PageShell

@@ -31,7 +31,7 @@ export default define.page(async function Gallery(props) {
       title="Galeria - TKD Dzwirzyno"
       description="Zdjęcia z zawodów, treningów i życia klubu."
       menuPages={menuPages}
-      ogImage="/static/bg_hero.jpg"
+      ogImage="/logo.jpg"
       ogType="website"
     >
       <div class="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-emerald-500/30">

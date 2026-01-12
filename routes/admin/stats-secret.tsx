@@ -1,8 +1,9 @@
 import { define } from "../../utils.ts";
 
 export default define.page(async function AdminStats() {
-  let stats: { path: string; count: number }[] = [];
+  let stats: { path: string; count: number; unique: number }[] = [];
   let totalViews = 0;
+  let totalUnique = 0;
   let errorMsg = "";
 
   try {
@@ -12,15 +13,22 @@ export default define.page(async function AdminStats() {
         
         for await (const entry of entries) {
             if (entry.key.length > 1) {
-            stats.push({
-                path: entry.key[1] as string,
-                count: Number(entry.value),
-            });
+              const path = entry.key[1] as string;
+              // Fetch unique count for this path
+              const uniqueRes = await kv.get<Deno.KvU64>(["site_uniques", path]);
+              const uniqueCount = uniqueRes.value ? Number(uniqueRes.value) : 0;
+
+              stats.push({
+                  path: path,
+                  count: Number(entry.value),
+                  unique: uniqueCount,
+              });
             }
         }
         // Sort by count descending
         stats.sort((a, b) => b.count - a.count);
         totalViews = stats.reduce((acc, curr) => acc + curr.count, 0);
+        totalUnique = stats.reduce((acc, curr) => acc + curr.unique, 0);
     } else {
         errorMsg = "Deno KV is not available in this environment (try production build).";
     }
@@ -35,8 +43,11 @@ export default define.page(async function AdminStats() {
           <h1 class="text-3xl font-bold font-heading text-primary">
             Statystyki Odwiedzin
           </h1>
-          <div class="text-sm text-slate-500 font-mono">
-             Total: <span class="font-bold text-lg text-slate-900 dark:text-white">{totalViews}</span>
+          <div class="text-sm text-slate-500 font-mono text-right">
+             <div class="text-xs uppercase tracking-wide opacity-70">Odsłony / Unikalne</div>
+             <span class="font-bold text-lg text-slate-900 dark:text-white">{totalViews}</span> 
+             <span class="mx-2 text-slate-400">/</span>
+             <span class="font-bold text-lg text-blue-600 dark:text-blue-400">{totalUnique}</span>
           </div>
         </div>
 
@@ -49,38 +60,38 @@ export default define.page(async function AdminStats() {
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-              <thead class="bg-slate-100 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+              <thead class="bg-slate-100 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 font-medium text-slate-500 uppercase tracking-wider text-xs">
                 <tr>
-                  <th class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs">
-                    Ścieżka (URL)
-                  </th>
-                  <th class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs text-right">
-                    Odsłony
-                  </th>
-                  <th class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs text-right">
-                    % Ruchu
-                  </th>
+                  <th class="p-4 w-16">#</th>
+                  <th class="p-4">Ścieżka</th>
+                  <th class="p-4 text-right">Odsłony</th>
+                  <th class="p-4 text-right">Unikalne</th>
+                  <th class="p-4 text-right w-24">%</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-                {stats.map((stat) => (
-                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <td class="px-6 py-4 font-mono text-slate-600 dark:text-slate-400">
-                      <a href={stat.path} class="hover:text-primary transition-colors block truncate max-w-lg" target="_blank">
-                        {stat.path}
-                      </a>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                {stats.map((item, index) => (
+                  <tr key={item.path} class="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
+                    <td class="p-4 text-slate-400 font-mono text-xs">{index + 1}</td>
+                    <td class="p-4 font-mono text-slate-700 dark:text-slate-300 relative group">
+                        <span class="relative z-10">{item.path}</span>
+                         {/* Simple visual bar for proportion */}
+                         <div class="absolute left-0 top-0 bottom-0 bg-primary/5 dark:bg-primary/10 transition-all duration-500" style={{ width: `${(item.count / totalViews) * 100}%` }}></div>
                     </td>
-                    <td class="px-6 py-4 text-right font-bold text-slate-900 dark:text-white">
-                      {stat.count}
+                    <td class="p-4 text-right font-bold tabular-nums">
+                        {item.count}
                     </td>
-                     <td class="px-6 py-4 text-right text-slate-500 text-xs">
-                      {totalViews > 0 ? ((stat.count / totalViews) * 100).toFixed(1) : 0}%
+                     <td class="p-4 text-right font-bold text-blue-600 dark:text-blue-400 tabular-nums">
+                        {item.unique}
+                    </td>
+                    <td class="p-4 text-right text-slate-400 tabular-nums text-xs">
+                      {totalViews > 0 ? Math.round((item.count / totalViews) * 1000) / 10 : 0}%
                     </td>
                   </tr>
                 ))}
                 {stats.length === 0 && (
                   <tr>
-                    <td colSpan={3} class="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={5} class="px-6 py-12 text-center text-slate-500">
                       Brak danych. Odwiedź kilka stron, aby zebrać statystyki.
                     </td>
                   </tr>

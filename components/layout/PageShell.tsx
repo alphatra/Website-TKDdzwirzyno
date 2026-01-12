@@ -31,7 +31,7 @@ export function PageShell({
   noHeader = false,
   className = "",
   footer,
-  ogImage = "/LOGO_TKD_DZWIRZYNO.jpg", // Default logo
+  ogImage = "/logo.jpg", // Default logo
   ogType = "website",
   canonicalUrl,
   noIndex = false,

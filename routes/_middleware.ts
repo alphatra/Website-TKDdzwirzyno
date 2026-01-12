@@ -1,6 +1,7 @@
 import { FreshContext } from "fresh";
 import pb from "../utils/client.ts";
 import { NewsRecord, SiteInfoRecord } from "../utils/pocketbase.ts";
+import { getCookies, setCookie } from "@std/http/cookie";
 
 // Initialize Deno KV (conditional for dev/build environments)
 let kv: Deno.Kv | null = null;
@@ -51,15 +52,38 @@ export async function handler(ctx: FreshContext) {
   // Check cache
   const now = Date.now();
 
-  // --- Page View Counter (Deno KV) ---
-  // Count only GET requests to actual pages (not static assets, already filtered above)
+  // --- Page View Counter & Unique Visitors (Deno KV) ---
+  // Count only GET requests to actual pages
+  let newVisitor = false;
+  let visitorId = getCookies(req.headers)["v_id"];
+
+  if (!visitorId) {
+    visitorId = crypto.randomUUID();
+    newVisitor = true;
+  }
+
   if (req.method === "GET" && kv) {
     try {
-      // Fire and forget - do not await to keep response fast
-      kv.atomic()
-        .sum(["site_views", url.pathname], 1n)
-        .commit()
-        .catch((e) => console.error("KV Error:", e));
+      const atomic = kv.atomic();
+      // 1. Increment Total Views
+      atomic.sum(["site_views", url.pathname], 1n);
+
+      // 2. Check & Increment Unique Views
+      // We use a check on a specific key: ["visitors", url.pathname, visitorId]
+      // If it doesn't exist, we increment ["site_uniques", url.pathname]
+      const visitorKey = ["visitors", url.pathname, visitorId];
+      const visited = await kv.get(visitorKey);
+
+      if (!visited.value) {
+          atomic
+            .check({ key: visitorKey, versionstamp: null }) // Ensure it didn't just happen
+            .set(visitorKey, true, { expireIn: 1000 * 60 * 60 * 24 * 365 }) // Mark visited for 1 year
+            .sum(["site_uniques", url.pathname], 1n);
+      }
+
+      // Fire and forget commit
+      atomic.commit().catch((e) => console.error("KV Commit Error:", e));
+
     } catch (e) {
       console.error("KV access error:", e);
     }
@@ -114,6 +138,17 @@ export async function handler(ctx: FreshContext) {
 
   // Only force no-cache for HTML pages if needed, but definitely NOT for everything
   // newHeaders.set("Cache-Control", "no-cache, no-store, must-revalidate");
+
+  if (newVisitor) {
+    setCookie(newHeaders, {
+      name: "v_id",
+      value: visitorId,
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      httpOnly: true,
+      sameSite: "Lax",
+    });
+  }
 
   return new Response(resp.body, {
     status: resp.status,

@@ -35,7 +35,7 @@ export default define.page(async (props) => {
       title="Aktualności - TKD Dźwirzyno"
       description="Najnowsze informacje z życia klubu, relacje z zawodów i komunikaty."
       menuPages={menuPages}
-      ogImage="/static/bg_hero.jpg"
+      ogImage="/logo.jpg"
       ogType="website"
     >
       <div class="pt-32 pb-20 bg-slate-50 dark:bg-slate-900 min-h-screen">
