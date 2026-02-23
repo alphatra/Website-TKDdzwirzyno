@@ -84,6 +84,13 @@ if [ -f "$SERVICE_FILE" ]; then
     sudo systemctl enable $SERVICE_NAME
 fi
 
+# Kill any existing PM2 instances of the app to free up port 8000 for systemd
+if command -v pm2 >/dev/null 2>&1; then
+    echo "Stopping any legacy PM2 processes..."
+    pm2 delete $SERVICE_NAME || true
+    pm2 save --force || true
+fi
+
 echo "Restarting ${SERVICE_NAME}.service..."
 if sudo systemctl restart $SERVICE_NAME; then
     echo "Service ${SERVICE_NAME} restarted successfully."
