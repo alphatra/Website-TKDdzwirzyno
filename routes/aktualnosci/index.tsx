@@ -24,7 +24,19 @@ export default define.page(async (props) => {
     news = result.items;
     totalItems = result.totalItems;
   } catch (e) {
-    console.warn("PocketBase Fetch Error (News):", e instanceof Error ? e.message : String(e));
+    const errorMsg = e instanceof Error ? e.message : String(e);
+    console.warn("PocketBase Fetch Error (News):", errorMsg);
+    news = [{
+      id: "error123",
+      title: "API ERROR",
+      summary: JSON.stringify(e),
+      content: "<p>Check the summary</p>",
+      image: "",
+      created: new Date().toISOString(),
+      updated: new Date().toISOString(),
+      collectionId: "news",
+      collectionName: "news"
+    } as any];
   }
 
   const totalPages = Math.ceil(totalItems / perPage);
