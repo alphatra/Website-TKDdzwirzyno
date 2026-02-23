@@ -82,14 +82,15 @@ if [ -f "$SERVICE_FILE" ]; then
     sudo cp "$SERVICE_FILE" /etc/systemd/system/
     sudo systemctl daemon-reload
     sudo systemctl enable $SERVICE_NAME
-fi
-
-# Kill any existing PM2 instances of the app to free up port 8000 for systemd
-if command -v pm2 >/dev/null 2>&1; then
-    echo "Stopping any legacy PM2 processes..."
-    pm2 delete $SERVICE_NAME || true
-    pm2 save --force || true
-fi
+# Brutally kill any legacy PM2 or Deno instances so systemd can take over the port
+echo "Forcefully terminating legacy PM2 and Deno processes..."
+# Try to stop PM2 services if they exist
+sudo systemctl disable --now pm2-ubuntu.service || true
+sudo systemctl disable --now pm2-root.service || true
+# Kill processes
+sudo pkill -9 -f "pm2" || true
+sudo pkill -9 -f "deno" || true
+sleep 2
 
 echo "Restarting ${SERVICE_NAME}.service..."
 if sudo systemctl restart $SERVICE_NAME; then
