@@ -9,6 +9,8 @@
     "jsr:@fresh/core@^2.2.0": "2.2.0",
     "jsr:@fresh/plugin-vite@^1.0.8": "1.0.8",
     "jsr:@std/bytes@^1.0.6": "1.0.6",
+    "jsr:@std/csv@*": "1.0.6",
+    "jsr:@std/dotenv@*": "0.225.6",
     "jsr:@std/dotenv@~0.225.5": "0.225.6",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
     "jsr:@std/fmt@^1.0.7": "1.0.8",
@@ -101,7 +103,7 @@
         "jsr:@deno/loader@~0.3.2",
         "jsr:@fresh/core@2",
         "jsr:@fresh/core@^2.2.0",
-        "jsr:@std/dotenv",
+        "jsr:@std/dotenv@~0.225.5",
         "jsr:@std/fmt@^1.0.7",
         "jsr:@std/path@1",
         "npm:@babel/core",
@@ -114,6 +116,9 @@
     },
     "@std/bytes@1.0.6": {
       "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
+    },
+    "@std/csv@1.0.6": {
+      "integrity": "52ef0e62799a0028d278fa04762f17f9bd263fad9a8e7f98c14fbd371d62d9fd"
     },
     "@std/dotenv@0.225.6": {
       "integrity": "1d6f9db72f565bd26790fa034c26e45ecb260b5245417be76c2279e5734c421b"

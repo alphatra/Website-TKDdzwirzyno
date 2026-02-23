@@ -98,7 +98,6 @@ export async function handler(ctx: FreshContext) {
           sort: "menu_order",
         }),
         pb.collection("news").getList<NewsRecord>(1, 3, {
-          filter: "published=true",
           sort: "-created",
         }),
       ]);

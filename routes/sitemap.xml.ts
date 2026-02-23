@@ -43,7 +43,6 @@ export const handler: Handlers = {
     // Dynamic News
     try {
       const news = await pb.collection("news").getList<NewsRecord>(1, 50, {
-        filter: "published = true",
         sort: "-created",
       });
       for (const item of news.items) {

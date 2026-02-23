@@ -64,11 +64,6 @@ export default define.page(async (props) => {
                   year: "numeric",
                 })}
               </span>
-              {newsItem.published && (
-                <span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-xs font-bold uppercase">
-                  Opublikowane
-                </span>
-              )}
             </div>
             <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 dark:text-white mb-8 leading-tight">
               {newsItem.title}

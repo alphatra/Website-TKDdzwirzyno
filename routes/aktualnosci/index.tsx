@@ -18,7 +18,6 @@ export default define.page(async (props) => {
       page,
       perPage,
       {
-        filter: "published=true",
         sort: "-created",
       },
     );
