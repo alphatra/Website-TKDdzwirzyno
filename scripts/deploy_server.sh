@@ -82,6 +82,8 @@ if [ -f "$SERVICE_FILE" ]; then
     sudo cp "$SERVICE_FILE" /etc/systemd/system/
     sudo systemctl daemon-reload
     sudo systemctl enable $SERVICE_NAME
+fi
+
 # Brutally kill any legacy PM2 or Deno instances so systemd can take over the port
 echo "Forcefully terminating legacy PM2 and Deno processes..."
 # Try to stop PM2 services if they exist
