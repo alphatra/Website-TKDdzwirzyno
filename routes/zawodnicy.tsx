@@ -80,7 +80,7 @@ export default define.page(async function Zawodnicy(props) {
       };
     });
   } catch (e) {
-    console.error("PocketBase Fetch Error (Athletes):", e);
+    console.warn("PocketBase Fetch Error (Athletes):", e instanceof Error ? e.message : String(e));
   }
 
   // Filter with safe defaults - empty status falls back to active

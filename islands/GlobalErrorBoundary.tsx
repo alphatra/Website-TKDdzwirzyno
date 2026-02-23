@@ -35,6 +35,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
               Coś poszło nie tak. Odśwież stronę lub spróbuj ponownie później.
             </p>
             <button
+              type="button"
               onClick={() => globalThis.location.reload()}
               class="px-6 py-3 bg-primary text-white font-bold rounded-full hover:bg-primary-600 transition-colors"
             >

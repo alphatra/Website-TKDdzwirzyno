@@ -1,12 +1,9 @@
 import { useRef } from "preact/hooks";
 import { Athlete } from "../../../utils/types.ts";
-import { MedalDisplay } from "../../../components/athletes/MedalDisplay.tsx";
 import { parseRank } from "../../../utils/rank.ts";
 import { useScrollLock } from "../shared/useScrollLock.ts";
 import { useFocusTrap } from "../shared/useFocusTrap.ts";
 import { useOutsideClick } from "../shared/useOutsideClick.ts";
-import Toast from "../../ui/Toast.tsx";
-import { useState } from "preact/hooks";
 
 interface AthleteModalProps {
   athlete: Athlete | null;
@@ -19,7 +16,6 @@ export default function AthleteModal(
 ) {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null); // Keep this ref for initial focus
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Use custom hooks for robust behavior
   useScrollLock(isOpen);
@@ -93,6 +89,7 @@ export default function AthleteModal(
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          type="button"
           ref={closeButtonRef}
           onClick={onClose}
           class="absolute top-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md text-slate-800 dark:text-white hover:text-primary hover:bg-white/20 border border-white/20 transition-all duration-300 group"

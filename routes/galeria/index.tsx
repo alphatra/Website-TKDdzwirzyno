@@ -21,7 +21,7 @@ export default define.page(async function Gallery(props) {
     });
     albums = records.items;
   } catch (error) {
-    console.error("Error fetching albums:", error);
+    console.warn("PocketBase Fetch Error (Albums):", error instanceof Error ? error.message : String(error));
   }
 
   const { menuPages } = props.state;

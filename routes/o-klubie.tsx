@@ -4,8 +4,10 @@ import { define } from "../utils.ts";
 import pb from "../utils/client.ts";
 import { PageShell } from "../components/layout/PageShell.tsx";
 import { PageRecord } from "../utils/pocketbase.ts";
+import { Breadcrumbs } from "../components/ui/Breadcrumbs.tsx";
+import { PageProps } from "$fresh/server.ts";
 
-export default define.page(async function AboutPage(props) {
+export default define.page(async function AboutPage(props: PageProps) {
   // Real data fetch logic remains same ...
   let record: PageRecord | null = null;
   try {
@@ -58,6 +60,15 @@ export default define.page(async function AboutPage(props) {
       {/* 1. CLEAN HERO SECTION */}
       <section class="bg-primary-900 py-32 text-center text-white relative overflow-hidden">
         <div class="container-custom relative z-10 px-4">
+          <div class="flex justify-center mb-8">
+            <Breadcrumbs
+              theme="dark"
+              items={[
+                { label: title },
+              ]}
+              class="mb-0"
+            />
+          </div>
           <h1 class="text-4xl md:text-6xl font-heading font-black tracking-wide uppercase mb-6">
             {title}
           </h1>

@@ -46,6 +46,6 @@
       "noscript",
       "template"
     ],
-    "types": ["vite/client"]
+    "types": ["vite/client", "npm:preact@^10.28.1"]
   }
 }

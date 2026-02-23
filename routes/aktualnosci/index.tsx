@@ -24,8 +24,8 @@ export default define.page(async (props) => {
     );
     news = result.items;
     totalItems = result.totalItems;
-  } catch (_e) {
-    // console.warn("News fetch error", _e);
+  } catch (e) {
+    console.warn("PocketBase Fetch Error (News):", e instanceof Error ? e.message : String(e));
   }
 
   const totalPages = Math.ceil(totalItems / perPage);

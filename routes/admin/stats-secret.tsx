@@ -1,7 +1,7 @@
 import { define } from "../../utils.ts";
 
 export default define.page(async function AdminStats() {
-  let stats: { path: string; count: number; unique: number }[] = [];
+  const stats: { path: string; count: number; unique: number }[] = [];
   let totalViews = 0;
   let totalUnique = 0;
   let errorMsg = "";

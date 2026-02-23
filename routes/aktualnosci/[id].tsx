@@ -4,6 +4,7 @@ import { PageShell } from "../../components/layout/PageShell.tsx";
 import { NewsRecord } from "../../utils/pocketbase.ts";
 import { ErrorState } from "../../components/ui/ErrorState.tsx";
 import { sanitize } from "../../utils/sanitize.ts";
+import { Breadcrumbs } from "../../components/ui/Breadcrumbs.tsx";
 
 export default define.page(async (props) => {
   const { id } = props.params;
@@ -46,13 +47,13 @@ export default define.page(async (props) => {
     >
       <article class="pt-32 pb-20 min-h-screen bg-slate-50 dark:bg-slate-900">
         <div class="container-custom max-w-4xl">
-          <a
-            href="/aktualnosci"
-            class="inline-flex items-center gap-2 text-slate-500 hover:text-primary mb-8 transition-colors font-bold uppercase text-xs tracking-wider"
-          >
-            <span class="material-icons-round text-sm">arrow_back</span>
-            Wróć do listy
-          </a>
+          <Breadcrumbs
+            theme="light"
+            items={[
+              { label: "Aktualności", href: "/aktualnosci" },
+              { label: newsItem.title },
+            ]}
+          />
 
           <header class="mb-12">
             <div class="flex items-center gap-4 mb-4 text-sm text-slate-500 dark:text-slate-400 font-mono">

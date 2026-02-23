@@ -9,6 +9,7 @@ import { PageShell } from "../../components/layout/PageShell.tsx";
 import { ErrorState } from "../../components/ui/ErrorState.tsx";
 import { EmptyState } from "../../components/ui/EmptyState.tsx";
 import { sanitize } from "../../utils/sanitize.ts";
+import { Breadcrumbs } from "../../components/ui/Breadcrumbs.tsx";
 
 // ... (existing imports/interface code)
 
@@ -74,17 +75,13 @@ export default define.page(async function AlbumView(props) {
 
           <div class="relative z-10 bg-slate-900 text-white py-12 border-b border-slate-800">
             <div class="container mx-auto px-4">
-              <a
-                href="/galeria"
-                class="inline-flex items-center text-slate-400 hover:text-white mb-6 transition-colors font-bold uppercase tracking-wider text-xs group"
-              >
-                <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center mr-3 group-hover:bg-primary transition-colors">
-                  <span class="material-icons-round text-sm group-hover:-translate-x-0.5 transition-transform">
-                    arrow_back
-                  </span>
-                </div>
-                Powrót do Galerii
-              </a>
+              <Breadcrumbs
+                theme="dark"
+                items={[
+                  { label: "Galeria", href: "/galeria" },
+                  { label: album.title },
+                ]}
+              />
               <h1 class="text-3xl md:text-5xl font-heading font-bold mb-4 text-white">
                 {album.title}
               </h1>
