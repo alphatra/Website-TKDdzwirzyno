@@ -42,15 +42,9 @@ const records = parse(csvText, { skipFirstRow: true });
 function parseDate(dateStr: string) {
   if (!dateStr) return new Date().toISOString();
   try {
-    // Expected format: DD.MM.YYYY, HH:MM:SS
-    const parts = dateStr.split(", ");
-    if (parts.length !== 2) return new Date().toISOString();
-    const [datePart, timePart] = parts;
-    const dateParts = datePart.split(".");
-    if (dateParts.length !== 3) return new Date().toISOString();
-    const [day, month, year] = dateParts;
-    // Assume PL time usually, but Z will work as an approximation and PocketBase will store it
-    const d = new Date(`${year}-${month}-${day}T${timePart}Z`);
+    // CSV dates are in ISO 8601 format: 2026-01-16T18:53:26.000Z
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return new Date().toISOString();
     return d.toISOString();
   } catch (e) {
     return new Date().toISOString();

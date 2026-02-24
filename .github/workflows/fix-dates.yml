@@ -1,0 +1,33 @@
+name: Fix Post Dates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix-dates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run fix on server via SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
+          PB_ADMIN_EMAIL: ${{ secrets.PB_ADMIN_EMAIL }}
+          PB_ADMIN_PASSWORD: ${{ secrets.PB_ADMIN_PASSWORD }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+          # Copy the fix script and CSV to the server
+          scp scripts/fix_dates.sh "$DEPLOY_USER@$DEPLOY_HOST:/tmp/fix_dates.sh"
+          scp "static/Posts - Arkusz1.csv" "$DEPLOY_USER@$DEPLOY_HOST:/tmp/posts.csv"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "chmod +x /tmp/fix_dates.sh"
+
+          # Run the fix on the server (PocketBase is localhost there)
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "PB_ADMIN_EMAIL='$PB_ADMIN_EMAIL' PB_ADMIN_PASSWORD='$PB_ADMIN_PASSWORD' POCKETBASE_URL='http://127.0.0.1:8090' /tmp/fix_dates.sh '/tmp/posts.csv'"
