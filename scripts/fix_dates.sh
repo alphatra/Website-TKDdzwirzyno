@@ -1,28 +1,51 @@
 #!/bin/bash
 # fix_dates.sh — Fixes created dates in PocketBase news records
-# Uses only curl + jq, no Deno needed. Runs on the server via SSH.
+# Pure bash/curl/python3 — no Deno needed
 set -euo pipefail
 
+# --- Config: read from server .env if available ---
+SERVER_ENV="/var/www/tkd-dzwirzyno/.env"
+if [ -f "$SERVER_ENV" ]; then
+  echo "Reading credentials from $SERVER_ENV"
+  export $(grep -v '^#' "$SERVER_ENV" | xargs)
+fi
+
 PB_URL="${POCKETBASE_URL:-http://127.0.0.1:8090}"
-PB_EMAIL="${PB_ADMIN_EMAIL}"
-PB_PASS="${PB_ADMIN_PASSWORD}"
+PB_EMAIL="${PB_ADMIN_EMAIL:-}"
+PB_PASS="${PB_ADMIN_PASSWORD:-}"
 CSV_FILE="${1:-./static/Posts - Arkusz1.csv}"
+
+if [ -z "$PB_EMAIL" ] || [ -z "$PB_PASS" ]; then
+  echo "ERROR: Missing PB_ADMIN_EMAIL or PB_ADMIN_PASSWORD"
+  exit 1
+fi
 
 echo "=== PocketBase Date Fixer ==="
 echo "PB URL: $PB_URL"
 echo "CSV: $CSV_FILE"
 
-# --- Auth ---
+# --- Auth (try both old and new PocketBase endpoints) ---
 echo ""
 echo "[1/4] Authenticating..."
-AUTH_RESP=$(curl -s --max-time 5 -X POST "$PB_URL/api/admins/auth-with-password" \
-  -H "Content-Type: application/json" \
-  -d "{\"identity\":\"$PB_EMAIL\",\"password\":\"$PB_PASS\"}")
+AUTH_BODY="{\"identity\":\"$PB_EMAIL\",\"password\":\"$PB_PASS\"}"
 
-TOKEN=$(echo "$AUTH_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])" 2>/dev/null || true)
+# Try new endpoint first (PB >= 0.23: _superusers)
+TOKEN=$(curl -s --max-time 5 -X POST "$PB_URL/api/collections/_superusers/auth-with-password" \
+  -H "Content-Type: application/json" \
+  -d "$AUTH_BODY" 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))" 2>/dev/null || true)
+
+# Fallback to old endpoint (PB < 0.23: /api/admins)
+if [ -z "$TOKEN" ]; then
+  echo "  Trying legacy /api/admins endpoint..."
+  TOKEN=$(curl -s --max-time 5 -X POST "$PB_URL/api/admins/auth-with-password" \
+    -H "Content-Type: application/json" \
+    -d "$AUTH_BODY" 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))" 2>/dev/null || true)
+fi
 
 if [ -z "$TOKEN" ]; then
-  echo "FAILED to authenticate! Response: $AUTH_RESP"
+  echo "FAILED to authenticate with both endpoints!"
+  echo "Testing connectivity..."
+  curl -s --max-time 3 "$PB_URL/api/health" 2>&1 || echo "(no response)"
   exit 1
 fi
 echo "OK - authenticated."
@@ -30,53 +53,40 @@ echo "OK - authenticated."
 # --- Fetch all news records ---
 echo ""
 echo "[2/4] Fetching news records..."
-ALL_ITEMS="[]"
+rm -f /tmp/pb_news_items.txt
+touch /tmp/pb_news_items.txt
 PAGE=1
 while true; do
   RESP=$(curl -s --max-time 10 "$PB_URL/api/collections/news/records?page=$PAGE&perPage=200&fields=id,title,created" \
     -H "Authorization: $TOKEN")
   
-  ITEMS=$(echo "$RESP" | python3 -c "
+  python3 -c "
 import sys, json
 data = json.load(sys.stdin)
 for item in data.get('items', []):
-    print(item['id'] + '|' + item.get('title','').replace('|','') + '|' + item.get('created',''))
-total = data.get('totalItems', 0)
-print('TOTAL:' + str(total))
-" 2>/dev/null)
+    # Use tab separator to avoid issues with pipes in titles
+    print(item['id'] + '\t' + item.get('title','') + '\t' + item.get('created',''))
+" <<< "$RESP" >> /tmp/pb_news_items.txt 2>/dev/null
 
-  # Check total
-  TOTAL=$(echo "$ITEMS" | grep "^TOTAL:" | cut -d: -f2)
-  # Get records (non-TOTAL lines)
-  RECORDS=$(echo "$ITEMS" | grep -v "^TOTAL:")
-  
-  if [ -n "$RECORDS" ]; then
-    echo "$RECORDS" >> /tmp/pb_news_items.txt
-  fi
-  
-  COUNT=$(echo "$RECORDS" | wc -l | tr -d ' ')
+  COUNT=$(python3 -c "import sys,json; print(len(json.load(sys.stdin).get('items',[])))" <<< "$RESP" 2>/dev/null || echo "0")
+  TOTAL=$(python3 -c "import sys,json; print(json.load(sys.stdin).get('totalItems',0))" <<< "$RESP" 2>/dev/null || echo "?")
   echo "  Page $PAGE: $COUNT items (total: $TOTAL)"
   
-  if [ "$COUNT" -lt 200 ]; then
-    break
-  fi
+  if [ "$COUNT" -lt 200 ]; then break; fi
   PAGE=$((PAGE + 1))
 done
 
 TOTAL_FETCHED=$(wc -l < /tmp/pb_news_items.txt | tr -d ' ')
 echo "Fetched $TOTAL_FETCHED records."
 
-# --- Parse CSV for title -> date mapping ---
+# --- Parse CSV ---
 echo ""
 echo "[3/4] Parsing CSV for dates..."
 
-# Build mapping: title -> ISO date
-# CSV columns: Post Data (JSON), Post ID, Created Time, Post Link, Full Picture URL, Message, Picture URL, Post Story
-# We extract Created Time (col 3) and Message (col 6) using python3
-python3 << 'PYEOF' > /tmp/csv_title_dates.txt
-import csv, sys
+python3 << PYEOF > /tmp/csv_title_dates.txt
+import csv
 
-with open(sys.argv[1] if len(sys.argv) > 1 else "./static/Posts - Arkusz1.csv", encoding="utf-8") as f:
+with open("$CSV_FILE", encoding="utf-8") as f:
     reader = csv.DictReader(f)
     for row in reader:
         created = row.get("Created Time", "").strip()
@@ -84,12 +94,12 @@ with open(sys.argv[1] if len(sys.argv) > 1 else "./static/Posts - Arkusz1.csv", 
         message = message.strip()
         if not message or not created:
             continue
-        # Replicate title generation: first line, max 60 chars
-        title = message.split("\n")[0][:60].strip()
-        if len(message.split("\n")[0]) >= 60:
+        first_line = message.split("\n")[0]
+        title = first_line[:60].strip()
+        if len(first_line) >= 60:
             title += "..."
-        # Output: title|isodate
-        print(f"{title.replace('|','')}|{created}")
+        # tab-separated: title \t date
+        print(f"{title}\t{created}")
 PYEOF
 
 CSV_COUNT=$(wc -l < /tmp/csv_title_dates.txt | tr -d ' ')
@@ -103,22 +113,25 @@ SKIPPED=0
 NO_MATCH=0
 ERRORS=0
 
-while IFS='|' read -r PB_ID PB_TITLE PB_CREATED; do
-  # Find matching CSV entry
-  CSV_DATE=$(grep -F "$PB_TITLE" /tmp/csv_title_dates.txt 2>/dev/null | head -1 | cut -d'|' -f2 || true)
+while IFS=$'\t' read -r PB_ID PB_TITLE PB_CREATED; do
+  [ -z "$PB_ID" ] && continue
+  
+  # Find matching CSV entry (exact title match)
+  CSV_DATE=$(grep -F "$PB_TITLE" /tmp/csv_title_dates.txt 2>/dev/null | head -1 | cut -f2 || true)
   
   if [ -z "$CSV_DATE" ]; then
     NO_MATCH=$((NO_MATCH + 1))
     continue
   fi
   
-  # Check if already correct (simple prefix match since PB stores differently)
-  if echo "$PB_CREATED" | grep -q "$(echo "$CSV_DATE" | cut -c1-19)"; then
+  # Check if already correct
+  CSV_PREFIX=$(echo "$CSV_DATE" | cut -c1-19)
+  if echo "$PB_CREATED" | grep -q "$CSV_PREFIX" 2>/dev/null; then
     SKIPPED=$((SKIPPED + 1))
     continue
   fi
   
-  # Update via PATCH
+  # PATCH update
   HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 \
     -X PATCH "$PB_URL/api/collections/news/records/$PB_ID" \
     -H "Authorization: $TOKEN" \
@@ -134,7 +147,6 @@ while IFS='|' read -r PB_ID PB_TITLE PB_CREATED; do
   fi
 done < /tmp/pb_news_items.txt
 
-# Cleanup
 rm -f /tmp/pb_news_items.txt /tmp/csv_title_dates.txt
 
 echo ""
